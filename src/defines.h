@@ -33,10 +33,10 @@
 /* Offsets en la gdt */
 /* -------------------------------------------------------------------------- */
 #define GDT_OFF_NULL_DESC           (GDT_IDX_NULL_DESC      << 3)
-#define GDT_IDX_USER_CODE	8
-#define GDT_IDX_USER_DATA	9
-#define GDT_IDX_KERNEL_CODE	10
-#define GDT_IDX_KERNEL_DATA	11
+#define GDT_IDX_KERNEL_CODE	8
+#define GDT_IDX_KERNEL_DATA	9
+#define GDT_IDX_USER_CODE	10
+#define GDT_IDX_USER_DATA	11
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
