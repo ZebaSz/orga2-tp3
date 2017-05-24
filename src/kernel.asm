@@ -6,8 +6,11 @@
 %include "imprimir.mac"
 
 global start
-
-
+cli
+lgdt [0]
+mov eax, cr0
+or al, 1
+mov cr0, eax
 ;; Saltear seccion de datos
 jmp start
 
