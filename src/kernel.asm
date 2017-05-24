@@ -5,12 +5,8 @@
 
 %include "imprimir.mac"
 
+extern GDT_DESC
 global start
-cli
-lgdt [0]
-mov eax, cr0
-or al, 1
-mov cr0, eax
 ;; Saltear seccion de datos
 jmp start
 
@@ -45,13 +41,20 @@ start:
     
 
     ; Habilitar A20
-    
+    in al, 0x92
+    or al, 2
+    out 0x92, al
     ; Cargar la GDT
+    lgdt [GDT_DESC]
 
     ; Setear el bit PE del registro CR0
-    
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
     ; Saltar a modo protegido
-
+    jmp 0x80:modoprotegido
+    
+    modoprotegido:
     ; Establecer selectores de segmentos
 
     ; Establecer la base de la pila
