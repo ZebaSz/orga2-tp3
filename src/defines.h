@@ -38,7 +38,6 @@
 #define GDT_IDX_USER_CODE	10
 #define GDT_IDX_USER_DATA	11
 
-#define GDT_IDX_INT	14
 #define GDT_IDX_VIDEO	15
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */

@@ -6,6 +6,8 @@
 %include "imprimir.mac"
 
 extern GDT_DESC
+extern IDT_DESC
+extern idt_inicializar
 global start
 ;; Saltear seccion de datos
 jmp start
@@ -32,13 +34,14 @@ start:
     ; Cambiar modo de video a 80 X 50
     mov ax, 0003h
     int 10h ; set mode 03h
-    mov ax, 1112h
-    int 10h ; load 8x8 font
+    ;mov ax, 1112h
+    ;int 10h ; load 8x8 font
 
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
     ; Habilitar A20
+    xchg bx, bx
     call checkear_A20
     cmp ax, 1
     je A20_habilitado
@@ -72,7 +75,7 @@ BITS 32
     mov ebp, 0x27000
     
     ; Imprimir mensaje de bienvenida
-    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 0, 0
+    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
 
     ; Inicializar pantalla
     
@@ -91,15 +94,20 @@ BITS 32
     ; Inicializar el scheduler
 
     ; Inicializar la IDT
+    call idt_inicializar
     
     ; Cargar IDT
+    lidt [IDT_DESC]
+
+    ; ERROR DE PRUEBA
+    mov dword [fs:0xFFFFFF], 0xFA50
  
     ; Configurar controlador de interrupciones
 
     ; Cargar tarea inicial
 
     ; Habilitar interrupciones
-    ;sti
+    sti
 
     ; Saltar a la primera tarea: Idle
 

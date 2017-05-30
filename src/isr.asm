@@ -25,6 +25,30 @@ extern sched_proximo_indice
 global _isr%1
 
 _isr%1:
+    imprimir_texto_mp isrmensaje, isrmensaje_len, 0x07, 4, 0
+
+    mov eax, %1
+    mov ecx, 10
+    xor bx, bx
+
+    %%char_ascii:
+        xor edx, edx
+        div ecx
+        add edx, '0'
+        mov dh, 0x07
+        push dx
+        inc bx
+        test eax, eax
+        jnz %%char_ascii
+
+    mov cx, bx
+    mov ebx, 0xb8282 + (isrmensaje_len * 2)
+    %%print_exception_code
+        pop dx
+        mov [ebx], dx
+        add ebx, 2
+        loop %%print_exception_code
+
     mov eax, %1
     jmp $
 
@@ -37,10 +61,18 @@ _isr%1:
 isrnumero:           dd 0x00000000
 isrClock:            db '|/-\'
 
+isrmensaje:          db 'Exception! Su excepcion es:'
+isrmensaje_len:      equ $ - isrmensaje
+
+isrGpf:              db 'General Protection Fault (13)'
+isrGpf_len:          equ $ - isrGpf
+
 ;;
 ;; Rutina de atención de las EXCEPCIONES
 ;; -------------------------------------------------------------------------- ;;
 ISR 0
+
+ISR 13
 
 ;;
 ;; Rutina de atención del RELOJ
