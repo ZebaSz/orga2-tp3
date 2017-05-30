@@ -26,29 +26,7 @@ global _isr%1
 
 _isr%1:
     imprimir_texto_mp isrmensaje, isrmensaje_len, 0x07, 4, 0
-
-    mov eax, %1
-    mov ecx, 10
-    xor bx, bx
-
-    %%char_ascii:
-        xor edx, edx
-        div ecx
-        add edx, '0'
-        mov dh, 0x07
-        push dx
-        inc bx
-        test eax, eax
-        jnz %%char_ascii
-
-    mov cx, bx
-    mov ebx, 0xb8282 + (isrmensaje_len * 2)
-    %%print_exception_code
-        pop dx
-        mov [ebx], dx
-        add ebx, 2
-        loop %%print_exception_code
-
+    imprimir_texto_mp isrmensaje_%1, isrmensaje_%1_len, 0x07, 5, 0
     mov eax, %1
     jmp $
 
@@ -64,8 +42,11 @@ isrClock:            db '|/-\'
 isrmensaje:          db 'Exception! Su excepcion es:'
 isrmensaje_len:      equ $ - isrmensaje
 
-isrGpf:              db 'General Protection Fault (13)'
-isrGpf_len:          equ $ - isrGpf
+isrmensaje_0:        db 'Divide-by-zero (0)'
+isrmensaje_0_len:    equ $ - isrmensaje_0
+
+isrmensaje_13:       db 'General Protection Fault (13)'
+isrmensaje_13_len:   equ $ - isrmensaje_13
 
 ;;
 ;; Rutina de atención de las EXCEPCIONES
