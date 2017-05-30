@@ -46,7 +46,6 @@ start:
 
 A20_habilitado:
     ; Cargar la GDT
-    xchg bx, bx
     lgdt [GDT_DESC]
 
     ; Setear el bit PE del registro CR0
@@ -59,12 +58,21 @@ A20_habilitado:
 
 BITS 32
     modoprotegido:
-    xor eax, eax
     xchg bx, bx
     ; Establecer selectores de segmentos
+    xor eax, eax
+    mov ax, 1001000b ; index = 9 | gdt = 0 | rpl = 0 
+    mov ds, ax ; kernel data segment
+    mov es, ax
+    mov gs, ax
+
+    mov ax, 1111000b ; index = 15 | gdt = 0 | rpl = 0 
+    mov fs, ax ; video segment
     ; Establecer la base de la pila
+    mov ebp, 0x27000
     
     ; Imprimir mensaje de bienvenida
+    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 0, 0
 
     ; Inicializar pantalla
     
@@ -91,6 +99,7 @@ BITS 32
     ; Cargar tarea inicial
 
     ; Habilitar interrupciones
+    ;sti
 
     ; Saltar a la primera tarea: Idle
 
