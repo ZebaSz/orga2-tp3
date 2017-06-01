@@ -8,6 +8,7 @@
 extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
+extern mmu_inicializar
 global start
 ;; Saltear seccion de datos
 jmp start
@@ -82,10 +83,18 @@ BITS 32
     ; Inicializar el manejador de memoria
  
     ; Inicializar el directorio de paginas
+    call mmu_inicializar
     
     ; Cargar directorio de paginas
 
+
     ; Habilitar paginacion
+    mov eax, 0x27000 ;PAGE_DIRECTORY
+    mov cr3, eax
+    
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
     
     ; Inicializar tss
 
