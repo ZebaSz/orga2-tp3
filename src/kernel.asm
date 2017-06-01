@@ -9,6 +9,7 @@ extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
 extern mmu_inicializar
+extern mmu_inicializar_dir_kernel
 global start
 ;; Saltear seccion de datos
 jmp start
@@ -42,7 +43,6 @@ start:
     imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
     ; Habilitar A20
-    xchg bx, bx
     call checkear_A20
     cmp ax, 1
     je A20_habilitado
@@ -62,7 +62,6 @@ A20_habilitado:
 
 BITS 32
     modoprotegido:
-    xchg bx, bx
     ; Establecer selectores de segmentos
     xor eax, eax
     mov ax, 1001000b ; index = 9 | gdt = 0 | rpl = 0 
@@ -83,7 +82,7 @@ BITS 32
     ; Inicializar el manejador de memoria
  
     ; Inicializar el directorio de paginas
-    call mmu_inicializar
+    call mmu_inicializar_dir_kernel
     
     ; Cargar directorio de paginas
 

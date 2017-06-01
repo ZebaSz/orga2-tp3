@@ -41,6 +41,8 @@
 #define GDT_IDX_VIDEO	15
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
+#define PAGE_DIR                0x00027000
+#define PAGE_TAB                0x00028000
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
 
 #endif  /* !__DEFINES_H__ */
