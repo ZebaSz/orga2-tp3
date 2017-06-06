@@ -44,6 +44,11 @@ typedef struct pde_s {
 
 void mmu_inicializar();
 
+unsigned int mmu_proxima_pagina_fisica_libre();
+
+unsigned int PDE_OFFSET(unsigned int virtual);
+
+unsigned int PTE_OFFSET(unsigned int virtual);
 
 #endif	/* !__MMU_H__ */
 

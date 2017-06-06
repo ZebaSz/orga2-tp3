@@ -44,5 +44,8 @@
 #define PAGE_DIR                0x00027000
 #define PAGE_TAB                0x00028000
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */
+/* MMU */
+#define INICIO_PAGINAS_LIBRES	0x00029000
+#define PAGE_SIZE				0x1000
 
 #endif  /* !__DEFINES_H__ */
