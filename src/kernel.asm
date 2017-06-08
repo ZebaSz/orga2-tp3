@@ -10,6 +10,7 @@ extern IDT_DESC
 extern idt_inicializar
 extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
+extern print_mapa
 global start
 ;; Saltear seccion de datos
 jmp start
@@ -78,12 +79,11 @@ BITS 32
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
 
     ; Inicializar pantalla
-    
+    call print_mapa
     ; Inicializar el manejador de memoria
  
     ; Inicializar el directorio de paginas
     call mmu_inicializar_dir_kernel
-    
     ; Cargar directorio de paginas
 
 
@@ -94,7 +94,6 @@ BITS 32
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
-    
     ; Inicializar tss
 
     ; Inicializar tss de la tarea Idle
@@ -103,12 +102,10 @@ BITS 32
 
     ; Inicializar la IDT
     call idt_inicializar
-    
     ; Cargar IDT
     lidt [IDT_DESC]
-
     ; ERROR DE PRUEBA
-    mov dword [fs:0xFFFFFF], 0xFA50
+    ;mov dword [fs:0xFFFFFF], 0xFA50
  
     ; Configurar controlador de interrupciones
 

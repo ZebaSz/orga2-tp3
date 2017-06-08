@@ -98,6 +98,10 @@ void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3) {
 	tlbflush();
 }
 
+void mmu_inicializar_dir_zombi() {
+	
+}
+
 
 
 

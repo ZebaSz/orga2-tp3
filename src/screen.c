@@ -51,7 +51,17 @@ void print_int(unsigned int n, unsigned int x, unsigned int y, unsigned short at
     p[y][x].a = attr;
 }
 
-
-
-
+void print_mapa(){
+    int attr;
+    char* espacio = " ";
+    for(int i = 0; i < 80; i++){
+        for(int j = 0; j < 50; j++){
+            if (j == 0) attr = C_BG_BLACK;
+            else if (i == 0) attr = C_BG_RED;
+            else if (i == 79) attr = C_BG_BLUE;
+            else attr = C_BG_GREEN;
+            print(espacio, i, j, attr);
+        }
+    }
+}
 
