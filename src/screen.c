@@ -56,7 +56,7 @@ void print_mapa(){
     char* espacio = " ";
     for(int i = 0; i < 80; i++){
         for(int j = 0; j < 50; j++){
-            if (j == 0) attr = C_BG_BLACK;
+            if (j == 0 || (50 - j) <= 5 ) attr = C_BG_BLACK;
             else if (i == 0) attr = C_BG_RED;
             else if (i == 79) attr = C_BG_BLUE;
             else attr = C_BG_GREEN;

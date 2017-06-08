@@ -37,12 +37,12 @@ start:
     ; Cambiar modo de video a 80 X 50
     mov ax, 0003h
     int 10h ; set mode 03h
-    ;mov ax, 1112h
-    ;int 10h ; load 8x8 font
+    xor bx, bx
+    mov ax, 1112h
+    int 10h ; load 8x8 font
 
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
-
     ; Habilitar A20
     call checkear_A20
     cmp ax, 1
@@ -77,7 +77,6 @@ BITS 32
     
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
-
     ; Inicializar pantalla
     call print_mapa
     ; Inicializar el manejador de memoria
