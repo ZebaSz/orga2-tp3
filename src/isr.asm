@@ -48,21 +48,107 @@ isrmensaje_0_len:    equ $ - isrmensaje_0
 isrmensaje_13:       db 'General Protection Fault (13)'
 isrmensaje_13_len:   equ $ - isrmensaje_13
 
+isrmensaje_1:        db 'reserved (1)'
+isrmensaje_1_len:    equ $ - isrmensaje_1
+
+isrmensaje_2:        db 'NMI Interrupt (2)'
+isrmensaje_2_len:    equ $ - isrmensaje_2
+
+isrmensaje_3:        db 'Breakpoint (3)'
+isrmensaje_3_len:    equ $ - isrmensaje_3
+
+isrmensaje_4:        db 'Overflow (4)'
+isrmensaje_4_len:    equ $ - isrmensaje_4
+
+isrmensaje_5:        db 'BOUND Range Exceeded (5)'
+isrmensaje_5_len:    equ $ - isrmensaje_5
+
+isrmensaje_6:        db 'Invalid Opcode (Undefined Opcode) (6)'
+isrmensaje_6_len:    equ $ - isrmensaje_6
+
+isrmensaje_7:        db 'Device Not Available (No Math Coprocessor) (7)'
+isrmensaje_7_len:    equ $ - isrmensaje_7
+
+isrmensaje_8:        db 'Double Fault (8)'
+isrmensaje_8_len:    equ $ - isrmensaje_8
+
+isrmensaje_9:        db 'Coprocessor Segment Overrun (9)'
+isrmensaje_9_len:    equ $ - isrmensaje_9
+
+isrmensaje_10:       db 'Invalid TSS (10)'
+isrmensaje_10_len:   equ $ - isrmensaje_10
+
+isrmensaje_11:       db 'Segment not present (11)'
+isrmensaje_11_len:   equ $ - isrmensaje_11
+
+isrmensaje_12:       db 'Stack-Segment Fault (12)'
+isrmensaje_12_len:   equ $ - isrmensaje_12
+
+isrmensaje_14:       db 'Page Fault (14)'
+isrmensaje_14_len:   equ $ - isrmensaje_14
+
+isrmensaje_15:       db 'reserved (15)'
+isrmensaje_15_len:   equ $ - isrmensaje_15
+
+isrmensaje_16:       db 'x87 FPU Foating-Point Error (Math Fault) (16)'
+isrmensaje_16_len:   equ $ - isrmensaje_16
+
+isrmensaje_17:       db 'Alignment Check (17)'
+isrmensaje_17_len:   equ $ - isrmensaje_17
+
+isrmensaje_18:       db 'Machine Check (18)'
+isrmensaje_18_len:   equ $ - isrmensaje_18
+
+isrmensaje_19:        db 'SIMD Floating-Point Exception (19)'
+isrmensaje_19_len:    equ $ - isrmensaje_19
+
 ;;
 ;; Rutina de atención de las EXCEPCIONES
 ;; -------------------------------------------------------------------------- ;;
 ISR 0
-
+ISR 1
+ISR 2
+ISR 3
+ISR 4
+ISR 5
+ISR 6
+ISR 7
+ISR 8
+ISR 9
+ISR 10
+ISR 11
+ISR 12
 ISR 13
+ISR 14
+ISR 15
+ISR 16
+ISR 17
+ISR 18
+ISR 19
 
 ;;
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
 
+global _isr32
+
+_isr32:
+    call fin_intr_pic1
+    call proximo_reloj
+    iret
+
 ;;
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
+global _isr33
 
+_isr33:
+    pushad
+    call fin_intr_pic1
+    in al, 0x60
+    ;XCHG BX, BX TODO: en al esta el scancode hay que usarlo para imprimir en pantalla
+    popad
+    iret
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;; -------------------------------------------------------------------------- ;;

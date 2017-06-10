@@ -51,17 +51,32 @@ void print_int(unsigned int n, unsigned int x, unsigned int y, unsigned short at
     p[y][x].a = attr;
 }
 
-void print_mapa(){
+void print_mapa() {
+    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) VIDEO; // magia
     int attr;
-    char* espacio = " ";
-    for(int i = 0; i < 80; i++){
-        for(int j = 0; j < 50; j++){
-            if (j == 0 || (50 - j) <= 5 ) attr = C_BG_BLACK;
+    for(int i = 0; i < VIDEO_COLS; i++) {
+        for(int j = 0; j < VIDEO_FILS; j++) {
+            if (j == 0) attr = C_BG_BLACK;
+            else if (j >= 45 ) {
+                if (i >= 35 && i < 45) {
+                    if (i < 40) attr =  C_BG_RED;
+                    else attr = C_BG_BLUE;
+                } else attr = C_BG_BLACK;
+                
+
+                
+            } 
             else if (i == 0) attr = C_BG_RED;
             else if (i == 79) attr = C_BG_BLUE;
             else attr = C_BG_GREEN;
-            print(espacio, i, j, attr);
+            p[j][i].a = attr;
+            p[j][i].c = 0;
         }
     }
 }
 
+void print_nombre_grupo() {
+    int GRUPO_LEN = 17;
+    char* GRUPO = "InsiSto gEnio zen";
+    print(GRUPO, (VIDEO_COLS - GRUPO_LEN), 0, C_FG_WHITE | C_BG_BLACK);
+}
