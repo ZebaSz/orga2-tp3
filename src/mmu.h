@@ -46,9 +46,11 @@ void mmu_inicializar();
 
 unsigned int mmu_proxima_pagina_fisica_libre();
 
-unsigned int PDE_OFFSET(unsigned int virtual);
+void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisica);
 
-unsigned int PTE_OFFSET(unsigned int virtual);
+void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3);
+
+void mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea);
 
 #endif	/* !__MMU_H__ */
 

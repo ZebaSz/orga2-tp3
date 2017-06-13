@@ -86,16 +86,13 @@ BITS 32
     call print_mapa
     call print_nombre_grupo
     ; Inicializar el manejador de memoria
- 
+    call mmu_inicializar
     ; Inicializar el directorio de paginas
     call mmu_inicializar_dir_kernel
     ; Cargar directorio de paginas
-
-
-    ; Habilitar paginacion
-    mov eax, 0x27000 ;PAGE_DIRECTORY
+    mov eax, 0x27000
     mov cr3, eax
-    
+    ; Habilitar paginacion
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
@@ -109,8 +106,6 @@ BITS 32
     call idt_inicializar
     ; Cargar IDT
     lidt [IDT_DESC]
-    ; ERROR DE PRUEBA
-    ;mov dword [fs:0xFFFFFF], 0xFA50
  
     ; Configurar controlador de interrupciones
 

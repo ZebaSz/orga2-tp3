@@ -7,15 +7,8 @@
 
 #include "mmu.h"
 
-
-
-unsigned int PDE_OFFSET(unsigned int virtual) {
-	return virtual >> 22;
-}
-
-unsigned int PTE_OFFSET(unsigned int virtual) {
-	return (virtual << 10) >> 22;
-}
+#define PDE_OFFSET(virtual) virtual >> 22
+#define PTE_OFFSET(virtual) (virtual << 10) >> 22
 
 unsigned int proxima_pagina_libre; //TODO: ver cual es la inicializacion: suponemos 0x29000 que puede ser la primera libre
 
@@ -29,8 +22,8 @@ unsigned int mmu_proxima_pagina_fisica_libre() {
 	return pagina_libre;
 }
 
-void mmu_inicializar_dir_kernel() {
-	pd_entry* dir_paginas = (pd_entry*) PAGE_DIR;
+void mmu_mapear_dir_kernel(unsigned int pd, unsigned int pt) {
+	pd_entry* dir_paginas = (pd_entry*) pd;
 	dir_paginas[0].p = 1;
 	dir_paginas[0].rw = 1;
 	dir_paginas[0].us = 0;
@@ -41,10 +34,10 @@ void mmu_inicializar_dir_kernel() {
 	dir_paginas[0].ps = 0;
 	dir_paginas[0].g = 0;
 	dir_paginas[0].avl = 0;
-	dir_paginas[0].page_addr = PAGE_TAB >> 12;
+	dir_paginas[0].page_addr = pt >> 12;
 
 
-	pt_entry* tablas = (pt_entry*)PAGE_TAB;
+	pt_entry* tablas = (pt_entry*)pt;
 	for(int i = 0; i < 1024; i++) {
 		tablas[i].p = 1;
 		tablas[i].rw = 1;
@@ -58,6 +51,10 @@ void mmu_inicializar_dir_kernel() {
 		tablas[i].avl = 0;
 		tablas[i].page_addr = i;
 	}
+}
+
+void mmu_inicializar_dir_kernel() {
+	mmu_mapear_dir_kernel(KERNEL_PAGE_DIR, KERNEL_PAGE_TAB);
 }
 
 void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisica) {
@@ -98,8 +95,41 @@ void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3) {
 	tlbflush();
 }
 
-void mmu_inicializar_dir_zombi() {
-	
+void mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea) {
+	unsigned int pd = mmu_proxima_pagina_fisica_libre();
+	unsigned int pt = mmu_proxima_pagina_fisica_libre();
+	mmu_mapear_dir_kernel(pd, pt);
+
+	char direccion = jugador == JUG_A ? 1 : -1;
+
+	unsigned int offset = yPos * MAP_MEM_WIDTH;
+
+	mmu_mapear_pagina(TASK_VIRT, pd,
+		MAP_START + offset);
+
+	mmu_mapear_pagina(TASK_VIRT+(1*PAGE_SIZE), pd,
+		MAP_START + (offset + direccion * PAGE_SIZE));
+
+	mmu_mapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd,
+		MAP_START + (offset + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd,
+		MAP_START + (offset + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd,
+		MAP_START + (offset + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd,
+		MAP_START + (offset - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd,
+		MAP_START + (offset - direccion * PAGE_SIZE));
+
+	mmu_mapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd,
+		MAP_START + (offset - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
+		MAP_START + (offset - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
 }
 
 
