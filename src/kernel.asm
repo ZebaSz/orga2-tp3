@@ -11,7 +11,10 @@ extern idt_inicializar
 extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
 extern print_mapa
+extern print_nombre_grupo
 global start
+extern resetear_pic
+extern habilitar_pic
 ;; Saltear seccion de datos
 jmp start
 
@@ -23,6 +26,8 @@ iniciando_mr_len equ    $ - iniciando_mr_msg
 
 iniciando_mp_msg db     'Iniciando kernel (Modo Protegido)...'
 iniciando_mp_len equ    $ - iniciando_mp_msg
+
+
 
 ;;
 ;; Seccion de código.
@@ -79,6 +84,7 @@ BITS 32
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
     ; Inicializar pantalla
     call print_mapa
+    call print_nombre_grupo
     ; Inicializar el manejador de memoria
     call mmu_inicializar
     ; Inicializar el directorio de paginas
@@ -106,10 +112,13 @@ BITS 32
     ; Cargar tarea inicial
 
     ; Habilitar interrupciones
+    
+    call resetear_pic     
+    call habilitar_pic
+
     sti
 
     ; Saltar a la primera tarea: Idle
-
     ; Ciclar infinitamente (por si algo sale mal...)
     mov eax, 0xFFFF
     mov ebx, 0xFFFF

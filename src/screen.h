@@ -28,6 +28,6 @@ void print_int(unsigned int n, unsigned int x, unsigned int y, unsigned short at
 
 void print_mapa();
 
-void game_tick();
+void print_nombre_grupo();
 
 #endif  /* !__SCREEN_H__ */
