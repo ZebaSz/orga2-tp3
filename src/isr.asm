@@ -126,6 +126,13 @@ ISR 17
 ISR 18
 ISR 19
 
+global _isr102
+
+_isr102:
+    mov eax, 0x42
+    iret
+
+
 ;;
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
@@ -133,8 +140,10 @@ ISR 19
 global _isr32
 
 _isr32:
+    pushad
     call fin_intr_pic1
     call proximo_reloj
+    popad
     iret
 
 ;;
@@ -146,7 +155,7 @@ _isr33:
     pushad
     call fin_intr_pic1
     in al, 0x60
-    ;XCHG BX, BX TODO: en al esta el scancode hay que usarlo para imprimir en pantalla
+    ;XCHG BX, BX ;TODO: en al esta el scancode hay que usarlo para imprimir en pantalla
     popad
     iret
 ;;
