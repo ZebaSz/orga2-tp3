@@ -11,6 +11,19 @@ BITS 32
 sched_tarea_offset:     dd 0x00
 sched_tarea_selector:   dw 0x00
 
+debug_flag:             db 0x0
+
+%define VIDEO           0xB8000
+
+%define DEBUG_W         30
+%define DEBUG_H         36
+
+debug_map_buffer:       resw (DEBUG_H * DEBUG_W)
+
+%define debug_off       00b
+%define debug_on        01b
+%define debug_shown     10b
+
 ;; PIC
 extern fin_intr_pic1
 
@@ -25,10 +38,22 @@ extern sched_proximo_indice
 global _isr%1
 
 _isr%1:
+    pushad
+    ;call matar_tarea
+
+    mov al, [debug_flag]
+    test al, debug_on
+    jz _isr%1.tarea_muerta
+
+
     imprimir_texto_mp isrmensaje, isrmensaje_len, 0x07, 4, 0
     imprimir_texto_mp isrmensaje_%1, isrmensaje_%1_len, 0x07, 5, 0
-    mov eax, %1
-    jmp $
+    mov byte [debug_flag], debug_shown
+
+    _isr%1.tarea_muerta:
+    call fin_intr_pic1
+    popad
+    iret
 
 %endmacro
 
@@ -36,6 +61,7 @@ _isr%1:
 ;; Datos
 ;; -------------------------------------------------------------------------- ;;
 ; Scheduler
+
 isrnumero:           dd 0x00000000
 isrClock:            db '|/-\'
 
@@ -141,21 +167,58 @@ global _isr32
 
 _isr32:
     pushad
-    call fin_intr_pic1
     call proximo_reloj
+
+    call sched_proximo_indice
+
+    cmp ax, 0
+    je .nojump
+        mov [sched_tarea_selector], ax
+        call fin_intr_pic1
+        jmp far [sched_tarea_offset]
+        jmp .end
+
+    .nojump:
+    call fin_intr_pic1
+
+    .end:
     popad
     iret
 
 ;;
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
+
+%define key_debug 0x15 ; Y
+
+
 global _isr33
 
 _isr33:
     pushad
-    call fin_intr_pic1
     in al, 0x60
-    ;XCHG BX, BX ;TODO: en al esta el scancode hay que usarlo para imprimir en pantalla
+    cmp al, key_debug
+    je .toggle_debug
+    jmp .keyboard_end
+
+    .toggle_debug:
+        xchg bx, bx
+
+        mov al, [debug_flag]
+        test al, (debug_shown | debug_on)
+        jz .enable_debug
+        test al, debug_shown
+        jz .keyboard_end
+        ; disable_debug
+        ; copiar buffer de video viejo
+        mov byte [debug_flag], debug_off
+        jmp .keyboard_end
+
+        .enable_debug:
+        mov byte [debug_flag], debug_on
+
+    .keyboard_end:
+    call fin_intr_pic1
     popad
     iret
 ;;
@@ -185,3 +248,32 @@ proximo_reloj:
         ret
         
         
+matar_tarea:
+    ; MATAR TAREA AQUI
+
+
+    ; mostrar cartel debug
+    mov al, [debug_flag]
+    test al, debug_on
+    jz .tarea_muerta
+    ;     ; copiamos mapa viejo a buffer
+    ;     mov esi, 80 * 2 ; ancho de una fila de video
+    ;     mov edx, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
+    ;     xor ebx, ebx
+    ;     .copiar_fila
+    ;         xor ecx, ecx
+    ;         mov eax, edx
+    ;         .copiar_punto
+    ;             mov edi, [eax + 2 * ecx]
+    ;             mov [eax + 2 * ecx], 
+
+    ;     ; dibujamos dialogo debug
+    ;     mov eax, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
+    ;     xor ebx, ebx
+    ;     .dibujar_fila
+    ;         xor ecx, ecx
+
+    mov byte [debug_flag], debug_shown
+
+    .tarea_muerta:
+    ret

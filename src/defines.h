@@ -40,7 +40,10 @@
 #define GDT_IDX_USER_CODE       10
 #define GDT_IDX_USER_DATA       11
 
+#define GDT_IDX_TSS             12
+
 #define GDT_IDX_VIDEO           15
+
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
 #define KERNEL_PAGE_DIR         0x00027000
