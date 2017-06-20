@@ -15,6 +15,8 @@ extern print_nombre_grupo
 global start
 extern resetear_pic
 extern habilitar_pic
+extern tss_inicializar
+extern tss_inicializar_idle
 ;; Saltear seccion de datos
 jmp start
 
@@ -97,9 +99,9 @@ BITS 32
     or eax, 0x80000000
     mov cr0, eax
     ; Inicializar tss
-
+    call tss_inicializar
     ; Inicializar tss de la tarea Idle
-
+    call tss_inicializar_idle
     ; Inicializar el scheduler
 
     ; Inicializar la IDT
@@ -111,11 +113,13 @@ BITS 32
     call resetear_pic
     call habilitar_pic
     ; Cargar tarea inicial
-
+    mov ax, 0x64
+    ltr ax
     ; Habilitar interrupciones
     sti
 
     ; Saltar a la primera tarea: Idle
+    jmp 0x68:0
     ; Ciclar infinitamente (por si algo sale mal...)
     mov eax, 0xFFFF
     mov ebx, 0xFFFF

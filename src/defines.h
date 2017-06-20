@@ -31,21 +31,44 @@
 #define GDT_COUNT 30
 
 #define GDT_IDX_NULL_DESC       0
-
-/* Offsets en la gdt */
-/* -------------------------------------------------------------------------- */
-#define GDT_OFF_NULL_DESC       (GDT_IDX_NULL_DESC      << 3)
 #define GDT_IDX_KERNEL_CODE     8
 #define GDT_IDX_KERNEL_DATA     9
 #define GDT_IDX_USER_CODE       10
 #define GDT_IDX_USER_DATA       11
 
-#define GDT_IDX_TSS             12
+#define GDT_IDX_TSS_INIT        12
+#define GDT_IDX_TSS_IDLE        13
 
 #define GDT_IDX_VIDEO           15
 
+#define GDT_IDX_TSS_A1          16
+#define GDT_IDX_TSS_A2          17
+#define GDT_IDX_TSS_A3          18
+#define GDT_IDX_TSS_A4          19
+#define GDT_IDX_TSS_A5          20
+#define GDT_IDX_TSS_A6          21
+#define GDT_IDX_TSS_A7          22
+#define GDT_IDX_TSS_A8          23
+#define GDT_IDX_TSS_B1          24
+#define GDT_IDX_TSS_B2          25
+#define GDT_IDX_TSS_B3          26
+#define GDT_IDX_TSS_B4          27
+#define GDT_IDX_TSS_B5          28
+#define GDT_IDX_TSS_B6          29
+#define GDT_IDX_TSS_B7          30
+#define GDT_IDX_TSS_B8          31
+
+/* Offsets en la gdt */
+/* -------------------------------------------------------------------------- */
+#define GDT_OFF_NULL_DESC       (GDT_IDX_NULL_DESC      << 3)
+#define GDT_OFF_KERNEL_CODE     (GDT_IDX_KERNEL_CODE    << 3)
+#define GDT_OFF_KERNEL_DATA     (GDT_IDX_KERNEL_DATA    << 3)
+#define GDT_OFF_USER_CODE       (GDT_IDX_USER_CODE      << 3)
+#define GDT_OFF_USER_DATA       (GDT_IDX_USER_DATA      << 3)
+
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */
+#define KERNEL_STACK_BASE       0x00027000
 #define KERNEL_PAGE_DIR         0x00027000
 #define KERNEL_PAGE_TAB         0x00028000
 #define VIDEO                   0x000B8000 /* direccion fisica del buffer de video */

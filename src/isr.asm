@@ -38,7 +38,6 @@ extern sched_proximo_indice
 global _isr%1
 
 _isr%1:
-    pushad
     ;call matar_tarea
 
     mov al, [debug_flag]
@@ -52,8 +51,9 @@ _isr%1:
 
     _isr%1.tarea_muerta:
     call fin_intr_pic1
-    popad
-    iret
+
+    mov [sched_tarea_selector], word 0x68 ; TODO: INSERTAR SELECTOR TAREA IDLE AQUI
+    jmp far [sched_tarea_offset]
 
 %endmacro
 
