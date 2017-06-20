@@ -108,14 +108,11 @@ BITS 32
     lidt [IDT_DESC]
  
     ; Configurar controlador de interrupciones
-
+    call resetear_pic
+    call habilitar_pic
     ; Cargar tarea inicial
 
     ; Habilitar interrupciones
-    
-    call resetear_pic     
-    call habilitar_pic
-
     sti
 
     ; Saltar a la primera tarea: Idle
