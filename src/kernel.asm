@@ -17,6 +17,7 @@ extern resetear_pic
 extern habilitar_pic
 extern tss_inicializar
 extern tss_inicializar_idle
+extern game_inicializar
 ;; Saltear seccion de datos
 jmp start
 
@@ -103,7 +104,6 @@ BITS 32
     ; Inicializar tss de la tarea Idle
     call tss_inicializar_idle
     ; Inicializar el scheduler
-
     ; Inicializar la IDT
     call idt_inicializar
     ; Cargar IDT
@@ -112,6 +112,10 @@ BITS 32
     ; Configurar controlador de interrupciones
     call resetear_pic
     call habilitar_pic
+
+    ;inicializar game
+    call game_inicializar
+
     ; Cargar tarea inicial
     mov ax, 0x64
     ltr ax

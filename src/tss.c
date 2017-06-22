@@ -15,38 +15,33 @@ tss tss_zombisB[CANT_ZOMBIS];
 
 void tss_inicializar() {
 	unsigned int base = (unsigned int) &tss_inicial;
+    tss_inicializar_gdt_entry(GDT_IDX_TSS_INIT, base);
+}
 
-	gdt[GDT_IDX_TSS_INIT].limit_0_15 = 0x0068;
-	gdt[GDT_IDX_TSS_INIT].base_0_15 = base & 0xFFFF;
-	gdt[GDT_IDX_TSS_INIT].base_23_16 = (base >> 16) & 0xFF;
-	gdt[GDT_IDX_TSS_INIT].type = 0x9;
-	gdt[GDT_IDX_TSS_INIT].s = 0x0;
-	gdt[GDT_IDX_TSS_INIT].dpl = 0x0;
-	gdt[GDT_IDX_TSS_INIT].p = 0x1;
-	gdt[GDT_IDX_TSS_INIT].limit_16_19 = 0x0;
-	gdt[GDT_IDX_TSS_INIT].avl = 0x1;
-	gdt[GDT_IDX_TSS_INIT].l = 0x0;
-	gdt[GDT_IDX_TSS_INIT].db = 0x0;
-	gdt[GDT_IDX_TSS_INIT].g = 0x0;
-	gdt[GDT_IDX_TSS_INIT].base_31_24 = (base >> 24);
+void tss_inicializar_zombie(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry) {
+    tss tss_zombie;
+    unsigned int base = (unsigned int) &tss_zombie;
+    tss_inicializar_gdt_entry(gdt_entry, base); 
+
+    tss_zombie.esp = TASK_VIRT | 0xFFF; // OFFSET de la task la pila empieza donde termina la task
+    tss_zombie.ebp = TASK_VIRT | 0xFFF;
+    tss_zombie.eflags = 0x202;
+    tss_zombie.eip = TASK_VIRT;
+    tss_zombie.cr3 = mmu_inicializar_dir_zombi(jugador, yPos, tarea);
+    tss_zombie.esp0 = mmu_proxima_pagina_fisica_libre();
+    tss_zombie.ss0 = GDT_IDX_KERNEL_DATA;
+    tss_zombie.iomap = 0xFFFF;
+    tss_zombie.cs = GDT_OFF_KERNEL_CODE | 0x3; // permisos usuario
+    tss_zombie.es = GDT_OFF_KERNEL_DATA | 0x3;
+    tss_zombie.ss = GDT_OFF_KERNEL_DATA | 0x3;
+    tss_zombie.ds = GDT_OFF_KERNEL_DATA | 0x3;
+    tss_zombie.fs = GDT_OFF_KERNEL_DATA | 0x3;
+    tss_zombie.gs = GDT_OFF_KERNEL_DATA | 0x3;
 }
 
 void tss_inicializar_idle() {
 	unsigned int base = (unsigned int) &tss_idle;
-
-	gdt[GDT_IDX_TSS_IDLE].limit_0_15 = 0x0068;
-	gdt[GDT_IDX_TSS_IDLE].base_0_15 = base & 0xFFFF;
-	gdt[GDT_IDX_TSS_IDLE].base_23_16 = (base >> 16) & 0xFF;
-	gdt[GDT_IDX_TSS_IDLE].type = 0x9;
-	gdt[GDT_IDX_TSS_IDLE].s = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].dpl = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].p = 0x1;
-	gdt[GDT_IDX_TSS_IDLE].limit_16_19 = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].avl = 0x1;
-	gdt[GDT_IDX_TSS_IDLE].l = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].db = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].g = 0x0;
-	gdt[GDT_IDX_TSS_IDLE].base_31_24 = (base >> 24);
+    tss_inicializar_gdt_entry(GDT_IDX_TSS_IDLE, base);
 
     tss_idle.ptl = 0x0000;
     tss_idle.unused0 = 0x0000;
@@ -88,3 +83,18 @@ void tss_inicializar_idle() {
     tss_idle.iomap = 0xFFFF;
 }
 
+void tss_inicializar_gdt_entry(unsigned int index, unsigned int base) {
+    gdt[index].limit_0_15 = 0x0068;
+    gdt[index].base_0_15 = base & 0xFFFF;
+    gdt[index].base_23_16 = (base >> 16) & 0xFF;
+    gdt[index].type = 0x9;
+    gdt[index].s = 0x0;
+    gdt[index].dpl = 0x0;
+    gdt[index].p = 0x1;
+    gdt[index].limit_16_19 = 0x0;
+    gdt[index].avl = 0x1;
+    gdt[index].l = 0x0;
+    gdt[index].db = 0x0;
+    gdt[index].g = 0x0;
+    gdt[index].base_31_24 = (base >> 24);
+}

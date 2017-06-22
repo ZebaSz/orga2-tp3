@@ -26,6 +26,17 @@
 #define JUG_A                   0
 #define JUG_B                   1
 
+#define KEY_CODE_A				0x1E
+#define KEY_CODE_D				0x20
+#define KEY_CODE_J				0x24
+#define KEY_CODE_L				0x26
+#define KEY_CODE_W 				0x11
+#define KEY_CODE_lShift 		0x2A
+#define KEY_CODE_rShift 		0x36
+#define KEY_CODE_I 				0x17
+#define KEY_CODE_K 				0x25
+#define KEY_CODE_S				0x1F
+
 /* Indices en la gdt */
 /* -------------------------------------------------------------------------- */
 #define GDT_COUNT 30

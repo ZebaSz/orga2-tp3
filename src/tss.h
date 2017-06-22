@@ -11,6 +11,7 @@
 #include "defines.h"
 #include "i386.h"
 #include "gdt.h"
+#include "mmu.h"
 
 typedef struct str_tss {
     unsigned short  ptl;
@@ -56,5 +57,7 @@ typedef struct str_tss {
 void tss_inicializar();
 
 void tss_inicializar_idle();
+
+void tss_inicializar_gdt_entry(unsigned int index, unsigned int base);
 
 #endif  /* !__TSS_H__ */

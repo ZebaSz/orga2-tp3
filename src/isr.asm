@@ -30,6 +30,9 @@ extern fin_intr_pic1
 ;; Sched
 extern sched_proximo_indice
 
+
+extern game_jugador_tecla
+
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
@@ -189,17 +192,28 @@ _isr32:
 ;; Rutina de atención del TECLADO
 ;; -------------------------------------------------------------------------- ;;
 
-%define key_debug 0x15 ; Y
-
+%define key_debug       0x15 ; Y
+%define key_a           0x1E
+%define key_s           0x1F
+;Definicion para la interupcion de teclado
 
 global _isr33
 
 _isr33:
     pushad
+    call fin_intr_pic1
+
     in al, 0x60
     cmp al, key_debug
     je .toggle_debug
-    jmp .keyboard_end
+    jmp .mov_zombie
+
+    .mov_zombie:
+        mov al, al
+        push eax
+        call game_jugador_tecla
+        add esp, 4
+        jmp .keyboard_end
 
     .toggle_debug:
         xchg bx, bx
@@ -217,8 +231,9 @@ _isr33:
         .enable_debug:
         mov byte [debug_flag], debug_on
 
+      
+
     .keyboard_end:
-    call fin_intr_pic1
     popad
     iret
 ;;

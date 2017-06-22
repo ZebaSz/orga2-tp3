@@ -95,7 +95,7 @@ void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3) {
 	tlbflush();
 }
 
-void mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea) {
+unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea) {
 	unsigned int pd = mmu_proxima_pagina_fisica_libre();
 	unsigned int pt = mmu_proxima_pagina_fisica_libre();
 	mmu_mapear_dir_kernel(pd, pt);
@@ -130,6 +130,8 @@ void mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsign
 
 	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
 		MAP_START + (offset - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	return pd;
 }
 
 
