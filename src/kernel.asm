@@ -10,7 +10,7 @@ extern IDT_DESC
 extern idt_inicializar
 extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
-extern print_mapa
+extern game_inicializar_tablero
 extern print_nombre_grupo
 global start
 extern resetear_pic
@@ -86,8 +86,9 @@ BITS 32
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
     ; Inicializar pantalla
-    call print_mapa
+    call mapa_inicializar
     call print_nombre_grupo
+    call game_inicializar_tablero
     ; Inicializar el manejador de memoria
     call mmu_inicializar
     ; Inicializar el directorio de paginas
@@ -131,6 +132,83 @@ BITS 32
     mov edx, 0xFFFF
     jmp $
     jmp $
+
+
+%define SIZE_W                  78
+%define SIZE_H                  44
+
+%define C_BG_BLACK              (0x0 << 12)
+%define C_BG_BLUE               (0x1 << 12)
+%define C_BG_GREEN              (0x2 << 12)
+%define C_BG_CYAN               (0x3 << 12)
+%define C_BG_RED                (0x4 << 12)
+%define C_BG_MAGENTA            (0x5 << 12)
+%define C_BG_BROWN              (0x6 << 12)
+%define C_BG_LIGHT_GREY         (0x7 << 12)
+
+mapa_inicializar:
+    mov ebx, (80 * 2)
+
+    xor ecx, ecx
+    mapa_primera_fila:
+        mov word [fs:2*ecx], C_BG_BLACK
+        inc ecx
+        cmp ecx, 80
+        jne mapa_primera_fila
+
+    mov ecx, 1
+    mapa_col_jug:
+        mov eax, ecx
+        mul ebx
+        mov word [fs:eax], C_BG_RED
+        mov word [fs:eax + ebx - 2], C_BG_BLUE
+
+        inc ecx
+        cmp ecx, 45
+        jne mapa_col_jug
+
+    mov ecx, 1
+    mapa_area_juego:
+        mov eax, ecx
+        mul ebx
+        mov edx, 1
+        mapa_area_juego_fil:
+            mov word [fs:eax + 2 * edx], C_BG_GREEN
+            inc edx
+            cmp edx, 79
+            jne mapa_area_juego_fil
+
+        inc ecx
+        cmp ecx, 45
+        jne mapa_area_juego
+
+    mov ecx, 45
+    mapa_tablero_bg:
+        mov eax, ecx
+        mul ebx
+        xor edx, edx
+        mapa_tablero_negro:
+            mov word [fs:eax + 2 * edx], C_BG_BLACK
+            inc edx
+            cmp edx, 80
+            jne mapa_tablero_negro
+
+        mov edx, 35
+        mapa_tablero_rojo:
+            mov word [fs:eax + 2 * edx], C_BG_RED
+            inc edx
+            cmp edx, 40
+            jne mapa_tablero_rojo
+        mapa_tablero_azul
+            mov word [fs:eax + 2 * edx], C_BG_BLUE
+            inc edx
+            cmp edx, 45
+            jne mapa_tablero_azul
+
+        inc ecx
+        cmp ecx, 50
+        jne mapa_tablero_bg
+    ret
 
 ;; -------------------------------------------------------------------------- ;;
 

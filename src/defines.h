@@ -19,6 +19,7 @@
 /* Misc */
 /* -------------------------------------------------------------------------- */
 #define CANT_ZOMBIS             8
+#define MAX_ZOMBIS              20
 
 #define SIZE_W                  78
 #define SIZE_H                  44
@@ -104,11 +105,32 @@
 /* MAPA */
 /* -------------------------------------------------------------------------- */
 #define MAP_START               0x400000
-#define MAP_WIDTH               78
-#define MAP_HEIGHT              44
 
-#define MAP_MEM_WIDTH           (MAP_WIDTH * PAGE_SIZE)
-#define MAP_MEM_SIZE            (MAP_WIDTH * MAP_HEIGHT * PAGE_SIZE)
+#define MAP_MEM_WIDTH           (SIZE_W * PAGE_SIZE)
+#define MAP_MEM_SIZE            (SIZE_W * SIZE_H * PAGE_SIZE)
+
+#define ZOMBIS_A_OFFSET         4
+#define ZOMBIS_B_OFFSET         60
+
+#define ZOMBICOUNT_A_OFFSET     32
+#define ZOMBICOUNT_B_OFFSET     48
+
+#define SCORE_A_OFFSET          37
+#define SCORE_B_OFFSET          42
+
+/* TECLADO */
+/* -------------------------------------------------------------------------- */
+#define KEY_A_UP                0x11 // w
+#define KEY_A_DN                0x1f // s
+#define KEY_A_LF                0x20 // d
+#define KEY_A_RT                0x1e // a
+#define KEY_A_SH                0x2a // LShift
+
+#define KEY_B_UP                0x17 // i
+#define KEY_B_DN                0x25 // k
+#define KEY_B_LF                0x26 // l
+#define KEY_B_RT                0x24 // j
+#define KEY_B_SH                0x36 // RShift
 
 
 #endif  /* !__DEFINES_H__ */

@@ -51,44 +51,6 @@ void print_int(unsigned int n, unsigned int x, unsigned int y, unsigned short at
     p[y][x].a = attr;
 }
 
-void print_mapa() {
-    // TODO: esto hay que hacerlo en asm con segmento fs 
-    ca (*p)[VIDEO_COLS] = (ca (*)[VIDEO_COLS]) VIDEO; // magia
-    for(int i = 0; i < VIDEO_COLS; i++) {
-        p[0][i].a = C_BG_BLACK;
-        p[0][i].c = 0;
-    }
-    for(int i = 1; i < VIDEO_COLS - 1; i++) {
-        for(int j = 1; j <= SIZE_H; j++) {
-            p[j][i].a = C_BG_GREEN;
-            p[j][i].c = 0;
-        }
-    }
-
-    for(int i = 1; i < VIDEO_COLS - 1; i++) {
-        for(int j = SIZE_H + 1; j <= VIDEO_FILS; j++) {
-            int attr;
-            if (i >= 35 && i < 40) {
-                attr = C_BG_RED;
-            } else if (i >= 40 && i < 45) {
-                attr = C_BG_BLUE;
-            } else {
-                attr = C_BG_BLACK;
-            }
-            p[j][i].a = attr;
-            p[j][i].c = 0;
-        }
-    }
-
-    for(int j = 1; j <= SIZE_H; j++) {
-        p[j][0].a = C_BG_RED;
-        p[j][0].c = 0;
-
-        p[j][VIDEO_COLS - 1].a = C_BG_BLUE;
-        p[j][VIDEO_COLS - 1].c = 0;
-    }
-}
-
 void print_nombre_grupo() {
     int GRUPO_LEN = 23;
     char* GRUPO = "InsiSto gEnio zen acaba";

@@ -93,3 +93,22 @@ void game_inicializar() {
 	print_zombie(JUG_A);
 	print_zombie(JUG_B);
 }
+
+void game_print_zombi_status(unsigned int jugador, unsigned int zombie, const char* status) {
+	unsigned int x_off = jugador == JUG_A ? ZOMBIS_A_OFFSET : ZOMBIS_B_OFFSET;
+	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_BLACK;
+	print(status, x_off + (zombie * 2), 48, attr);
+}
+
+void game_inicializar_tablero() {
+	for (int i = 0; i < CANT_ZOMBIS; ++i) {
+		print_int(i+1, 2*i + ZOMBIS_A_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
+		game_print_zombi_status(JUG_A, i, "x");
+		print_int(i+1, 2*i + ZOMBIS_B_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
+		game_print_zombi_status(JUG_B, i, "x");
+	}
+	print_int(MAX_ZOMBIS, ZOMBICOUNT_A_OFFSET, 47, C_FG_WHITE | C_BG_RED);
+	print_int(MAX_ZOMBIS, ZOMBICOUNT_B_OFFSET, 47, C_FG_WHITE | C_BG_BLUE);
+	print_int(0, SCORE_A_OFFSET, 47, C_FG_WHITE | C_BG_RED);
+	print_int(0, SCORE_B_OFFSET, 47, C_FG_WHITE | C_BG_BLUE);
+}

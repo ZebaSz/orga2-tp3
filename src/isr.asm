@@ -55,7 +55,7 @@ _isr%1:
     _isr%1.tarea_muerta:
     call fin_intr_pic1
 
-    mov [sched_tarea_selector], word 0x68 ; TODO: INSERTAR SELECTOR TAREA IDLE AQUI
+    mov [sched_tarea_selector], word 0x68
     jmp far [sched_tarea_offset]
 
 %endmacro
@@ -197,6 +197,20 @@ _isr32:
 %define key_s           0x1F
 ;Definicion para la interupcion de teclado
 
+; %define key_debug 0x15 ; Y
+
+; %define key_a_up 0x11 ; w
+; %define key_a_dn 0x1f ; s
+; %define key_a_lf 0x20 ; d
+; %define key_a_rt 0x1e ; a
+; %define key_a_sh 0x2a ; LShift
+
+; %define key_b_up 0x17 ; i
+; %define key_b_dn 0x25 ; k
+; %define key_b_lf 0x26 ; l
+; %define key_b_rt 0x24 ; j
+; %define key_b_sh 0x36 ; RShift
+
 global _isr33
 
 _isr33:
@@ -215,6 +229,31 @@ _isr33:
         add esp, 4
         jmp .keyboard_end
 
+    ; je .keyboard_end ;  MODO DEBUG DESHABILITADO
+    ; cmp al, key_a_up
+    ; je .move_a
+    ; cmp al, key_a_dn
+    ; je .move_a
+    ; cmp al, key_a_lf
+    ; je .move_a
+    ; cmp al, key_a_rt
+    ; je .move_a
+    ; cmp al, key_a_sh
+    ; je .newzombie_a
+
+    ; cmp al, key_b_up
+    ; je .move_b
+    ; cmp al, key_b_dn
+    ; je .move_b
+    ; cmp al, key_b_lf
+    ; je .move_b
+    ; cmp al, key_b_rt
+    ; je .move_b
+    ; cmp al, key_b_sh
+    ; je .newzombie_b
+
+    ; jmp .keyboard_end
+
     .toggle_debug:
         xchg bx, bx
 
@@ -226,10 +265,47 @@ _isr33:
         ; disable_debug
         ; copiar buffer de video viejo
         mov byte [debug_flag], debug_off
+        ;call sched_toggle_debug
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
+        ;call sched_toggle_debug
+        jmp .keyboard_end
+
+    .move_a:
+        mov ebx, 0
+        push ebx
+        mov al, al
+        push eax
+        ;call game_jugador_mover
+        pop ebx
+        pop eax
+        jmp .keyboard_end
+
+    .newzombie_a:
+        mov ebx, 0
+        push ebx
+        ;call game_lanzar_zombi
+        pop ebx
+        jmp .keyboard_end
+
+    .move_b:
+        mov ebx, 1
+        push ebx
+        mov al, al
+        push eax
+        ;call game_jugador_mover
+        pop ebx
+        pop eax
+        jmp .keyboard_end
+
+    .newzombie_b:
+        mov ebx, 1
+        push ebx
+        ;call game_lanzar_zombi
+        pop ebx
+        jmp .keyboard_end
 
       
 
