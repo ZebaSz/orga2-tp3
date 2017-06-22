@@ -29,6 +29,14 @@ extern fin_intr_pic1
 
 ;; Sched
 extern sched_proximo_indice
+extern sched_toggle_debug
+extern sched_lanzar_tarea
+extern sched_matar_tarea_actual
+
+;; Juego
+extern game_jugador_mover
+extern game_lanzar_zombi
+extern game_move_current_zombi
 
 
 extern game_jugador_tecla
@@ -41,18 +49,7 @@ extern game_jugador_tecla
 global _isr%1
 
 _isr%1:
-    ;call matar_tarea
-
-    mov al, [debug_flag]
-    test al, debug_on
-    jz _isr%1.tarea_muerta
-
-
-    imprimir_texto_mp isrmensaje, isrmensaje_len, 0x07, 4, 0
-    imprimir_texto_mp isrmensaje_%1, isrmensaje_%1_len, 0x07, 5, 0
-    mov byte [debug_flag], debug_shown
-
-    _isr%1.tarea_muerta:
+    call matar_tarea
     call fin_intr_pic1
 
     mov [sched_tarea_selector], word 0x68
@@ -193,23 +190,18 @@ _isr32:
 ;; -------------------------------------------------------------------------- ;;
 
 %define key_debug       0x15 ; Y
-%define key_a           0x1E
-%define key_s           0x1F
-;Definicion para la interupcion de teclado
 
-; %define key_debug 0x15 ; Y
+%define key_a_up        0x11 ; w
+%define key_a_dn        0x1f ; s
+%define key_a_lf        0x20 ; d
+%define key_a_rt        0x1e ; a
+%define key_a_sh        0x2a ; LShift
 
-; %define key_a_up 0x11 ; w
-; %define key_a_dn 0x1f ; s
-; %define key_a_lf 0x20 ; d
-; %define key_a_rt 0x1e ; a
-; %define key_a_sh 0x2a ; LShift
-
-; %define key_b_up 0x17 ; i
-; %define key_b_dn 0x25 ; k
-; %define key_b_lf 0x26 ; l
-; %define key_b_rt 0x24 ; j
-; %define key_b_sh 0x36 ; RShift
+%define key_b_up        0x17 ; i
+%define key_b_dn        0x25 ; k
+%define key_b_lf        0x26 ; l
+%define key_b_rt        0x24 ; j
+%define key_b_sh        0x36 ; RShift
 
 global _isr33
 
@@ -219,40 +211,31 @@ _isr33:
 
     in al, 0x60
     cmp al, key_debug
-    je .toggle_debug
-    jmp .mov_zombie
+    je .toggle_debug ;  MODO DEBUG DESHABILITADO
 
-    .mov_zombie:
-        mov al, al
-        push eax
-        call game_jugador_tecla
-        add esp, 4
-        jmp .keyboard_end
+    cmp al, key_a_up
+    je .move_jugador
+    cmp al, key_a_dn
+    je .move_jugador
+    cmp al, key_a_lf
+    je .move_jugador
+    cmp al, key_a_rt
+    je .move_jugador
+    cmp al, key_b_up
+    je .move_jugador
+    cmp al, key_b_dn
+    je .move_jugador
+    cmp al, key_b_lf
+    je .move_jugador
+    cmp al, key_b_rt
+    je .move_jugador
 
-    ; je .keyboard_end ;  MODO DEBUG DESHABILITADO
-    ; cmp al, key_a_up
-    ; je .move_a
-    ; cmp al, key_a_dn
-    ; je .move_a
-    ; cmp al, key_a_lf
-    ; je .move_a
-    ; cmp al, key_a_rt
-    ; je .move_a
-    ; cmp al, key_a_sh
-    ; je .newzombie_a
+    cmp al, key_a_sh
+    je .newzombie_a
+    cmp al, key_b_sh
+    je .newzombie_b
 
-    ; cmp al, key_b_up
-    ; je .move_b
-    ; cmp al, key_b_dn
-    ; je .move_b
-    ; cmp al, key_b_lf
-    ; je .move_b
-    ; cmp al, key_b_rt
-    ; je .move_b
-    ; cmp al, key_b_sh
-    ; je .newzombie_b
-
-    ; jmp .keyboard_end
+    jmp .keyboard_end
 
     .toggle_debug:
         xchg bx, bx
@@ -265,49 +248,34 @@ _isr33:
         ; disable_debug
         ; copiar buffer de video viejo
         mov byte [debug_flag], debug_off
-        ;call sched_toggle_debug
+        call sched_toggle_debug
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
-        ;call sched_toggle_debug
+        call sched_toggle_debug
         jmp .keyboard_end
 
-    .move_a:
-        mov ebx, 0
-        push ebx
+    .move_jugador:
         mov al, al
         push eax
-        ;call game_jugador_mover
-        pop ebx
-        pop eax
+        call game_jugador_tecla
+        add esp, 4
         jmp .keyboard_end
 
     .newzombie_a:
         mov ebx, 0
         push ebx
-        ;call game_lanzar_zombi
+        call game_lanzar_zombi
         pop ebx
-        jmp .keyboard_end
-
-    .move_b:
-        mov ebx, 1
-        push ebx
-        mov al, al
-        push eax
-        ;call game_jugador_mover
-        pop ebx
-        pop eax
         jmp .keyboard_end
 
     .newzombie_b:
         mov ebx, 1
         push ebx
-        ;call game_lanzar_zombi
+        call game_lanzar_zombi
         pop ebx
         jmp .keyboard_end
-
-      
 
     .keyboard_end:
     popad
@@ -341,7 +309,7 @@ proximo_reloj:
         
 matar_tarea:
     ; MATAR TAREA AQUI
-
+    call sched_matar_tarea_actual
 
     ; mostrar cartel debug
     mov al, [debug_flag]

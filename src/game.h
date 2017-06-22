@@ -27,9 +27,20 @@ void game_jugador_tecla(unsigned int value);
 void game_inicializar();
 
 typedef struct str_jugador {
-	unsigned int tipo_zombie;
-	unsigned int pos_y; 
+	unsigned int pos_y;
 	unsigned int pos_x;
+	unsigned int tipo_zombie;
+	unsigned int score;
+	unsigned int current;
+	unsigned int remaining;
 } __attribute__((__packed__)) jugador;
+
+typedef struct zombi_info_s {
+	unsigned int xPos;
+	unsigned int yPos;
+	unsigned int type;
+}__attribute__((__packed__)) zombi_info;
+
+extern zombi_info zombis[];
 
 #endif  /* !__GAME_H__ */

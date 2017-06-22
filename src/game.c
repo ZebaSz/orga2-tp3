@@ -6,11 +6,64 @@
 
 #include "game.h"
 
-jugador jugadores[2];
+zombi_info zombis[16] = {
+	[0] = (zombi_info) {
+	},	
+	[1] = (zombi_info) {
+	},	
+	[2] = (zombi_info) {
+	},	
+	[3] = (zombi_info) {
+	},	
+	[4] = (zombi_info) {
+	},	
+	[5] = (zombi_info) {
+	},	
+	[6] = (zombi_info) {
+	},	
+	[7] = (zombi_info) {
+	},	
+	[8] = (zombi_info) {
+	},	
+	[9] = (zombi_info) {
+	},	
+	[10] = (zombi_info) {
+	},
+	[11] = (zombi_info) {
+	},
+	[12] = (zombi_info) {
+	},
+	[13] = (zombi_info) {
+	},
+	[14] = (zombi_info) {
+	},
+	[15] = (zombi_info) {
+	}
+};
+
+jugador jugadores[2] = {
+
+	[JUG_A] = (jugador) {
+		1, // unsigned int pos_y;
+		0, // unsigned int pos_x;
+		0, // unsigned int type;
+		0, // unsigned int score;
+		0, // unsigned int current;
+		20 // unsigned int remaining;
+	},
+	[JUG_B] = (jugador) {
+		1, // unsigned int pos_y;
+		79,// unsigned int pos_x;
+		0, // unsigned int type;
+		0, // unsigned int score;
+		0, // unsigned int current;
+		20 // unsigned int remaining;
+	}
+};
+
 char* zombies[3] = {"G","M","C"};
 unsigned char FONDO_JUG_A =  C_FG_WHITE | C_BG_RED;
 unsigned char FONDO_JUG_B =  C_FG_WHITE | C_BG_BLUE;
-
 
 int mod(int a, int b) {
     int r = a % b;
@@ -83,24 +136,15 @@ void game_jugador_tecla(unsigned int value) {
 	}
 }
 
-void game_inicializar() {
-	jugadores[JUG_A].pos_y = 1;
-	jugadores[JUG_A].pos_x = 0;
-	jugadores[JUG_A].tipo_zombie = 0;
-	jugadores[JUG_B].pos_y = 1;
-	jugadores[JUG_B].pos_x = 79;
-	jugadores[JUG_B].tipo_zombie = 0;
-	print_zombie(JUG_A);
-	print_zombie(JUG_B);
-}
-
 void game_print_zombi_status(unsigned int jugador, unsigned int zombie, const char* status) {
 	unsigned int x_off = jugador == JUG_A ? ZOMBIS_A_OFFSET : ZOMBIS_B_OFFSET;
 	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_BLACK;
 	print(status, x_off + (zombie * 2), 48, attr);
 }
 
-void game_inicializar_tablero() {
+void game_inicializar() {
+	print_zombie(JUG_A);
+	print_zombie(JUG_B);
 	for (int i = 0; i < CANT_ZOMBIS; ++i) {
 		print_int(i+1, 2*i + ZOMBIS_A_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
 		game_print_zombi_status(JUG_A, i, "x");

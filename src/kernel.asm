@@ -10,7 +10,6 @@ extern IDT_DESC
 extern idt_inicializar
 extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
-extern game_inicializar_tablero
 extern print_nombre_grupo
 global start
 extern resetear_pic
@@ -18,6 +17,7 @@ extern habilitar_pic
 extern tss_inicializar
 extern tss_inicializar_idle
 extern game_inicializar
+extern sched_inicializar
 ;; Saltear seccion de datos
 jmp start
 
@@ -88,7 +88,7 @@ BITS 32
     ; Inicializar pantalla
     call mapa_inicializar
     call print_nombre_grupo
-    call game_inicializar_tablero
+    call game_inicializar
     ; Inicializar el manejador de memoria
     call mmu_inicializar
     ; Inicializar el directorio de paginas
@@ -105,24 +105,19 @@ BITS 32
     ; Inicializar tss de la tarea Idle
     call tss_inicializar_idle
     ; Inicializar el scheduler
+    call sched_inicializar
     ; Inicializar la IDT
     call idt_inicializar
     ; Cargar IDT
     lidt [IDT_DESC]
- 
     ; Configurar controlador de interrupciones
     call resetear_pic
     call habilitar_pic
-
-    ;inicializar game
-    call game_inicializar
-
     ; Cargar tarea inicial
     mov ax, 0x64
     ltr ax
     ; Habilitar interrupciones
     sti
-
     ; Saltar a la primera tarea: Idle
     jmp 0x68:0
     ; Ciclar infinitamente (por si algo sale mal...)
