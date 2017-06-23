@@ -58,6 +58,8 @@ void tss_inicializar();
 
 void tss_inicializar_idle();
 
+void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry);
+
 void tss_inicializar_gdt_entry(unsigned int index, unsigned int base);
 
 #endif  /* !__TSS_H__ */

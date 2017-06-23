@@ -38,6 +38,8 @@ extern game_jugador_mover
 extern game_lanzar_zombi
 extern game_move_current_zombi
 
+extern game_move_current_zombi
+
 
 extern game_jugador_tecla
 
@@ -155,7 +157,9 @@ ISR 19
 global _isr102
 
 _isr102:
-    mov eax, 0x42
+    push eax
+    call game_move_current_zombi
+    add esp, 4
     iret
 
 
@@ -170,11 +174,12 @@ _isr32:
     call proximo_reloj
 
     call sched_proximo_indice
-
+    ;xor eax, eax
     cmp ax, 0
     je .nojump
         mov [sched_tarea_selector], ax
         call fin_intr_pic1
+        xchg bx,bx
         jmp far [sched_tarea_offset]
         jmp .end
 

@@ -57,7 +57,10 @@ unsigned short sched_proximo_indice() {
 	} else {
 		// calculamos el offset del selector de la tarea en la gdt
 		proxTarea += 16;
+
 		proxTarea = TASK_OFFSET(proxTarea);
+		print_int(proxTarea, 10,0 , C_FG_RED);	
+
 		// actualizamos la ultima tarea ejecutada por el jugador
 		tareasAnteriores[proximoJugador] = tareaActual;
 		// y la tarea actual en ejecucion

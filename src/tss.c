@@ -18,25 +18,25 @@ void tss_inicializar() {
     tss_inicializar_gdt_entry(GDT_IDX_TSS_INIT, base);
 }
 
-void tss_inicializar_zombie(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry) {
-    tss tss_zombie;
-    unsigned int base = (unsigned int) &tss_zombie;
+void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry) {
+    tss tss_zombi;
+    unsigned int base = (unsigned int) &tss_zombi;
     tss_inicializar_gdt_entry(gdt_entry, base); 
 
-    tss_zombie.esp = TASK_VIRT | 0xFFF; // OFFSET de la task la pila empieza donde termina la task
-    tss_zombie.ebp = TASK_VIRT | 0xFFF;
-    tss_zombie.eflags = 0x202;
-    tss_zombie.eip = TASK_VIRT;
-    tss_zombie.cr3 = mmu_inicializar_dir_zombi(jugador, yPos, tarea);
-    tss_zombie.esp0 = mmu_proxima_pagina_fisica_libre();
-    tss_zombie.ss0 = GDT_IDX_KERNEL_DATA;
-    tss_zombie.iomap = 0xFFFF;
-    tss_zombie.cs = GDT_OFF_KERNEL_CODE | 0x3; // permisos usuario
-    tss_zombie.es = GDT_OFF_KERNEL_DATA | 0x3;
-    tss_zombie.ss = GDT_OFF_KERNEL_DATA | 0x3;
-    tss_zombie.ds = GDT_OFF_KERNEL_DATA | 0x3;
-    tss_zombie.fs = GDT_OFF_KERNEL_DATA | 0x3;
-    tss_zombie.gs = GDT_OFF_KERNEL_DATA | 0x3;
+    tss_zombi.esp = TASK_VIRT | 0xFFF; // OFFSET de la task la pila empieza donde termina la task
+    tss_zombi.ebp = TASK_VIRT | 0xFFF;
+    tss_zombi.eflags = 0x202;
+    tss_zombi.eip = TASK_VIRT;
+    tss_zombi.cr3 = mmu_inicializar_dir_zombi(jugador, yPos, tarea);
+    tss_zombi.esp0 = mmu_proxima_pagina_fisica_libre();
+    tss_zombi.ss0 = GDT_IDX_KERNEL_DATA;
+    tss_zombi.iomap = 0xFFFF;
+    tss_zombi.cs = GDT_OFF_USER_CODE; // permisos usuario
+    tss_zombi.es = GDT_OFF_USER_DATA;
+    tss_zombi.ss = GDT_OFF_USER_DATA;
+    tss_zombi.ds = GDT_OFF_USER_DATA;
+    tss_zombi.fs = GDT_OFF_USER_DATA;
+    tss_zombi.gs = GDT_OFF_USER_DATA;
 }
 
 void tss_inicializar_idle() {

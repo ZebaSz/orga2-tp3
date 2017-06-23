@@ -75,8 +75,8 @@
 #define GDT_OFF_NULL_DESC       (GDT_IDX_NULL_DESC      << 3)
 #define GDT_OFF_KERNEL_CODE     (GDT_IDX_KERNEL_CODE    << 3)
 #define GDT_OFF_KERNEL_DATA     (GDT_IDX_KERNEL_DATA    << 3)
-#define GDT_OFF_USER_CODE       (GDT_IDX_USER_CODE      << 3)
-#define GDT_OFF_USER_DATA       (GDT_IDX_USER_DATA      << 3)
+#define GDT_OFF_USER_CODE       (GDT_IDX_USER_CODE      << 3) | 0x3
+#define GDT_OFF_USER_DATA       (GDT_IDX_USER_DATA      << 3) | 0x3
 
 /* Direcciones de memoria */
 /* -------------------------------------------------------------------------- */

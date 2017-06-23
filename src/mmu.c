@@ -134,6 +134,11 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 	return pd;
 }
 
+void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned short dir) {}
+
+void mmu_desmapeo_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned char tarea) {}
+
+
 
 
 

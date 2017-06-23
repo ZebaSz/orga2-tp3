@@ -52,6 +52,10 @@ void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3);
 
 unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea);
 
+void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned short dir);
+
+void mmu_desmapeo_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned char tarea);
+
 #endif	/* !__MMU_H__ */
 
 

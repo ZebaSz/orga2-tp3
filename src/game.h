@@ -10,6 +10,8 @@
 #include "defines.h"
 #include "screen.h"
 #include "mmu.h"
+#include "sched.h"
+
 #include "i386.h"
 
 typedef enum direccion_e { IZQ = 0xAAA, DER = 0x441, ADE = 0x83D, ATR = 0x732 } direccion;
@@ -24,12 +26,14 @@ void game_jugador_cambiar_zombie(unsigned int value, unsigned int jugador);
 
 void game_jugador_tecla(unsigned int value);
 
+void game_print_zombi_status(unsigned int jugador, unsigned int zombie, const char* status);
+
 void game_inicializar();
 
 typedef struct str_jugador {
-	unsigned int pos_y;
-	unsigned int pos_x;
-	unsigned int tipo_zombie;
+	unsigned int yPos;
+	unsigned int xPos;
+	unsigned int tipo;
 	unsigned int score;
 	unsigned int current;
 	unsigned int remaining;
