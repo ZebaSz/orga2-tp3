@@ -114,7 +114,7 @@ BITS 32
     call resetear_pic
     call habilitar_pic
     ; Cargar tarea inicial
-    mov ax, 0x64
+    mov ax, 0x60
     ltr ax
     ; Habilitar interrupciones
     sti

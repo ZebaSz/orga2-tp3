@@ -38,6 +38,10 @@
 #define KEY_CODE_K 				0x25
 #define KEY_CODE_S				0x1F
 
+#define ZOMBI_TYPE_G            0
+#define ZOMBI_TYPE_M            1
+#define ZOMBI_TYPE_C            2
+
 /* Indices en la gdt */
 /* -------------------------------------------------------------------------- */
 #define GDT_COUNT 30
@@ -101,6 +105,8 @@
 #define TASK_IDLE               0x16000
 
 #define TASK_VIRT               0x08000000
+#define TASK_STACK_USER         0x0800a000
+#define TASK_STACK_KERNEL       0x0800b000
 
 /* MAPA */
 /* -------------------------------------------------------------------------- */

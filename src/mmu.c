@@ -38,7 +38,7 @@ void mmu_mapear_dir_kernel(unsigned int pd, unsigned int pt) {
 
 
 	pt_entry* tablas = (pt_entry*)pt;
-	for(int i = 0; i < 1024; i++) {
+	for(unsigned int i = 0; i < 1024; i++) {
 		tablas[i].p = 1;
 		tablas[i].rw = 1;
 		tablas[i].us = 0;
@@ -62,19 +62,24 @@ void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisi
 	pt_entry* tablas;
 	unsigned int dir_i = PDE_OFFSET(virtual);
 	unsigned int tabla_i = PTE_OFFSET(virtual);
-	pd_entry dir = dir_paginas[dir_i];
-	if (dir.p) {
-		tablas = (pt_entry*) ( (unsigned int) dir.page_addr); // ACA HAY FRUTELI
+	pd_entry* dir = &dir_paginas[dir_i];
+	if (dir->p) {
+		tablas = (pt_entry*) ( (unsigned int) dir->page_addr << 12); // ACA HAY FRUTELI
 	} else {
 		tablas = (pt_entry*) (mmu_proxima_pagina_fisica_libre());
 		for (unsigned int i = 0; i < 1024; i++){
 			tablas[i].p = 0; 
 		}
+
+		dir->p = 1;
+		dir->rw = 1;
+		dir->us = 1;
+		dir->page_addr = (unsigned int)tablas >> 12;
 	}
 
 	tablas[tabla_i].p = 1; //TODO: preguntar por los atributos
 	tablas[tabla_i].rw = 1;
-	tablas[tabla_i].us = 0;
+	tablas[tabla_i].us = 1;
 	tablas[tabla_i].pwt = 0;
 	tablas[tabla_i].pcd = 0;
 	tablas[tabla_i].a = 0;
@@ -82,7 +87,7 @@ void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisi
 	tablas[tabla_i].pat = 0;
 	tablas[tabla_i].g = 0;
 	tablas[tabla_i].avl = 0;
-	tablas[tabla_i].page_addr = fisica;
+	tablas[tabla_i].page_addr = (fisica >> 12);
 	tlbflush();
 }
 
@@ -131,7 +136,24 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
 		MAP_START + (offset - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
 
+	unsigned int pila3 = mmu_proxima_pagina_fisica_libre();
+	mmu_mapear_pagina(TASK_STACK_USER, pd, pila3);
+	unsigned int pila0 = mmu_proxima_pagina_fisica_libre();
+	mmu_mapear_pagina(TASK_STACK_KERNEL, pd, pila0);
+
 	return pd;
+}
+
+void memcpy(unsigned int src, unsigned int dest, unsigned int len) {
+	unsigned int cr3 = rcr3();
+	mmu_mapear_pagina(dest, cr3, dest);
+
+	char* srcp = (char*)src;
+	char* destp = (char*)dest;
+	for (unsigned int i = 0; i < len; ++i) {
+		destp[i] = srcp[i];
+	}
+	mmu_unmapear_pagina(dest, cr3);
 }
 
 void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned short dir) {}

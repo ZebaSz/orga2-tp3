@@ -19,24 +19,49 @@ void tss_inicializar() {
 }
 
 void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry) {
-    tss tss_zombi;
-    unsigned int base = (unsigned int) &tss_zombi;
-    tss_inicializar_gdt_entry(gdt_entry, base); 
+    tss* tss_zombi = jugador == JUG_A ? &tss_zombisA[tarea] : &tss_zombisB[tarea];
+    tss_inicializar_gdt_entry(gdt_entry, (unsigned int) tss_zombi); 
 
-    tss_zombi.esp = TASK_VIRT | 0xFFF; // OFFSET de la task la pila empieza donde termina la task
-    tss_zombi.ebp = TASK_VIRT | 0xFFF;
-    tss_zombi.eflags = 0x202;
-    tss_zombi.eip = TASK_VIRT;
-    tss_zombi.cr3 = mmu_inicializar_dir_zombi(jugador, yPos, tarea);
-    tss_zombi.esp0 = mmu_proxima_pagina_fisica_libre();
-    tss_zombi.ss0 = GDT_IDX_KERNEL_DATA;
-    tss_zombi.iomap = 0xFFFF;
-    tss_zombi.cs = GDT_OFF_USER_CODE; // permisos usuario
-    tss_zombi.es = GDT_OFF_USER_DATA;
-    tss_zombi.ss = GDT_OFF_USER_DATA;
-    tss_zombi.ds = GDT_OFF_USER_DATA;
-    tss_zombi.fs = GDT_OFF_USER_DATA;
-    tss_zombi.gs = GDT_OFF_USER_DATA;
+    gdt[gdt_entry].dpl = 0x3;
+
+    tss_zombi->ptl = 0x0000;
+    tss_zombi->unused0 = 0x0000;
+    tss_zombi->esp0 = TASK_STACK_KERNEL + 0xFFF;
+    tss_zombi->ss0 = GDT_OFF_KERNEL_DATA;
+    tss_zombi->unused1 = 0x0000;
+    tss_zombi->esp1 = 0x00000000;
+    tss_zombi->ss1 = 0x0000;
+    tss_zombi->unused2 = 0x0000;
+    tss_zombi->esp2 = 0x00000000;
+    tss_zombi->ss2 = 0x0000;
+    tss_zombi->unused3 = 0x0000;
+    tss_zombi->cr3 = mmu_inicializar_dir_zombi(jugador, yPos, tarea);
+    tss_zombi->eip = TASK_VIRT;
+    tss_zombi->eflags = 0x00000202;
+    tss_zombi->eax = 0x00000000;
+    tss_zombi->ecx = 0x00000000;
+    tss_zombi->edx = 0x00000000;
+    tss_zombi->ebx = 0x00000000;
+    tss_zombi->esp = TASK_STACK_USER + 0xFFF;
+    tss_zombi->ebp = TASK_STACK_USER + 0xFFF;
+    tss_zombi->esi = 0x00000000;
+    tss_zombi->edi = 0x00000000;
+    tss_zombi->es = GDT_OFF_USER_DATA;
+    tss_zombi->unused4 = 0x0000;
+    tss_zombi->cs = GDT_OFF_USER_CODE; // permisos usuario
+    tss_zombi->unused5 = 0x0000;
+    tss_zombi->ss = GDT_OFF_USER_DATA;
+    tss_zombi->unused6 = 0x0000;
+    tss_zombi->fs = GDT_OFF_USER_DATA;
+    tss_zombi->unused7 = 0x0000;
+    tss_zombi->fs = GDT_OFF_USER_DATA;
+    tss_zombi->unused8 = 0x0000;
+    tss_zombi->gs = GDT_OFF_USER_DATA;
+    tss_zombi->unused9 = 0x0000;
+    tss_zombi->ldt = 0x0000;
+    tss_zombi->unused10 = 0x0000;
+    tss_zombi->dtrap = 0x0000;
+    tss_zombi->iomap = 0xFFFF;
 }
 
 void tss_inicializar_idle() {
@@ -45,8 +70,8 @@ void tss_inicializar_idle() {
 
     tss_idle.ptl = 0x0000;
     tss_idle.unused0 = 0x0000;
-    tss_idle.esp0 = 0x00000000;
-    tss_idle.ss0 = 0x0000;
+    tss_idle.esp0 = KERNEL_STACK_BASE;
+    tss_idle.ss0 = GDT_OFF_KERNEL_DATA;
     tss_idle.unused1 = 0x0000;
     tss_idle.esp1 = 0x00000000;
     tss_idle.ss1 = 0x0000;

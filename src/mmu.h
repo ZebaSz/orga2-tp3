@@ -56,6 +56,8 @@ void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yP
 
 void mmu_desmapeo_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned char tarea);
 
+void memcpy(unsigned int src, unsigned int dest, unsigned int len);
+
 #endif	/* !__MMU_H__ */
 
 

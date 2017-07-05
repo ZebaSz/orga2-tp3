@@ -13,9 +13,9 @@
 
 unsigned char modo_debug;
 
-unsigned char status_tareas[16] = {0};
+unsigned char status_tareas[16] = {FALSE};
 unsigned int tareaActual;
-unsigned int tareasAnteriores[2] = {0, 8};
+unsigned int tareasAnteriores[2] = {TASK_PER_PLAYER - 1, TASK_COUNT - 1};
 
 // Buscar alguna tarea si no habia ninguna encolada
 unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
@@ -78,13 +78,14 @@ void sched_marcar_idle() {
 }
 
 unsigned int sched_lanzar_tarea(unsigned int jugador) {
-	unsigned int nuevaTarea = sched_buscar_tarea(jugador, TRUE);
+	unsigned int nuevaTarea = sched_buscar_tarea(jugador, FALSE);
 	status_tareas[nuevaTarea] = TRUE;
 	return nuevaTarea;
 }
 
 void sched_matar_tarea_actual() {
 	status_tareas[tareaActual] = FALSE;
+	sched_marcar_idle();
 }
 
 void sched_toggle_debug() {

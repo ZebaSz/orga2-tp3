@@ -51,10 +51,11 @@ extern game_jugador_tecla
 global _isr%1
 
 _isr%1:
+    xchg bx, bx
     call matar_tarea
-    call fin_intr_pic1
 
     mov [sched_tarea_selector], word 0x68
+    call fin_intr_pic1
     jmp far [sched_tarea_offset]
 
 %endmacro
@@ -72,9 +73,6 @@ isrmensaje_len:      equ $ - isrmensaje
 
 isrmensaje_0:        db 'Divide-by-zero (0)'
 isrmensaje_0_len:    equ $ - isrmensaje_0
-
-isrmensaje_13:       db 'General Protection Fault (13)'
-isrmensaje_13_len:   equ $ - isrmensaje_13
 
 isrmensaje_1:        db 'reserved (1)'
 isrmensaje_1_len:    equ $ - isrmensaje_1
@@ -112,6 +110,9 @@ isrmensaje_11_len:   equ $ - isrmensaje_11
 isrmensaje_12:       db 'Stack-Segment Fault (12)'
 isrmensaje_12_len:   equ $ - isrmensaje_12
 
+isrmensaje_13:       db 'General Protection Fault (13)'
+isrmensaje_13_len:   equ $ - isrmensaje_13
+
 isrmensaje_14:       db 'Page Fault (14)'
 isrmensaje_14_len:   equ $ - isrmensaje_14
 
@@ -127,8 +128,8 @@ isrmensaje_17_len:   equ $ - isrmensaje_17
 isrmensaje_18:       db 'Machine Check (18)'
 isrmensaje_18_len:   equ $ - isrmensaje_18
 
-isrmensaje_19:        db 'SIMD Floating-Point Exception (19)'
-isrmensaje_19_len:    equ $ - isrmensaje_19
+isrmensaje_19:       db 'SIMD Floating-Point Exception (19)'
+isrmensaje_19_len:   equ $ - isrmensaje_19
 
 ;;
 ;; Rutina de atención de las EXCEPCIONES
@@ -154,15 +155,6 @@ ISR 17
 ISR 18
 ISR 19
 
-global _isr102
-
-_isr102:
-    push eax
-    call game_move_current_zombi
-    add esp, 4
-    iret
-
-
 ;;
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
@@ -179,7 +171,6 @@ _isr32:
     je .nojump
         mov [sched_tarea_selector], ax
         call fin_intr_pic1
-        xchg bx,bx
         jmp far [sched_tarea_offset]
         jmp .end
 
@@ -293,6 +284,15 @@ _isr33:
 %define DER 0x441
 %define ADE 0x83D
 %define ATR 0x732
+
+global _isr102
+
+_isr102:
+; TODO: ds = 0, aca explota
+    push eax
+    call game_move_current_zombi
+    add esp, 4
+    iret
 
 
 ;; Funciones Auxiliares

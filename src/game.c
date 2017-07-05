@@ -70,6 +70,29 @@ int mod(int a, int b) {
     return r < 0 ? r + b : r;
 }
 
+unsigned int get_task_code(unsigned int jugador) {
+	if(jugador == JUG_A) {
+		switch(jugadores[jugador].tipo) {
+			case ZOMBI_TYPE_G:
+				return TASK_AG;
+			case ZOMBI_TYPE_M:
+				return TASK_AM;
+			case ZOMBI_TYPE_C:
+				return TASK_AC;
+		}
+	} else {
+		switch(jugadores[jugador].tipo) {
+			case ZOMBI_TYPE_G:
+				return TASK_BG;
+			case ZOMBI_TYPE_M:
+				return TASK_BM;
+			case ZOMBI_TYPE_C:
+				return TASK_BC;
+		}
+	}
+	return TASK_IDLE;
+}
+
 void print_zombi(int pos) {
 	unsigned short attr = (pos == 0) ? FONDO_JUG_A : FONDO_JUG_B;	
 	print(zombi_char[jugadores[pos].tipo], jugadores[pos].xPos , jugadores[pos].yPos, attr);
@@ -97,12 +120,17 @@ void game_jugador_mover(unsigned int value, unsigned int jugador) {
 }
 
 void game_lanzar_zombi(unsigned int jugador) {
-	if (jugadores[jugador].remaining > 0) {
-		jugadores[jugador].remaining --;
+	if (jugadores[jugador].remaining > 0 && jugadores[jugador].current < CANT_ZOMBIS) {
+		--jugadores[jugador].remaining;
+		++jugadores[jugador].current;
+
 		print_remaining(jugador);
-		unsigned int zPos = 0;
-		//unsigned int zPos = sched_lanzar_tarea(jugador);
-		//tss_inicializar_zombi(jugador, jugadores[jugador].yPos, 0, 16);
+		unsigned int zPos = sched_lanzar_tarea(jugador);
+		tss_inicializar_zombi(jugador, jugadores[jugador].yPos, zPos % 8, 16 + zPos);
+
+
+		unsigned int offset = jugadores[jugador].yPos * MAP_MEM_WIDTH;
+		memcpy(get_task_code(jugador), MAP_START + offset, PAGE_SIZE);
 
 		//zombi = jugador == JUG_A ? zPos : zPos - 8;
 		game_print_zombi_status(jugador, zPos, "/");
@@ -116,6 +144,7 @@ void game_lanzar_zombi(unsigned int jugador) {
 }
 
 void game_move_current_zombi(direccion dir) {
+	breakpoint();
 	//llamar sched eso me da el juegador y la posicion
 	unsigned int jugador = (tareaActual < 8) ? JUG_A : JUG_B;
 	zombi_info zombiActual = zombis[tareaActual];

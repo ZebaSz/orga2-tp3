@@ -67,4 +67,6 @@ void idt_inicializar() {
     IDT_ENTRY(32);
     IDT_ENTRY(33);
     IDT_ENTRY(102);
+    // int 0x66 debe ser accesible desde ring 3
+    idt[102].attr = (unsigned short) 0xEE00;
 }
