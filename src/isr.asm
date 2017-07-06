@@ -288,10 +288,13 @@ _isr33:
 global _isr102
 
 _isr102:
-; TODO: ds = 0, aca explota
+    pushad
     push eax
     call game_move_current_zombi
-    add esp, 4
+    pop eax
+    mov [sched_tarea_selector], word 0x68
+    jmp far [sched_tarea_offset]
+    popad
     iret
 
 

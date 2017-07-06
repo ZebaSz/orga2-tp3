@@ -119,41 +119,73 @@ void game_jugador_mover(unsigned int value, unsigned int jugador) {
 	print_zombi(jugador);
 }
 
+void game_print_rastro(unsigned int x, unsigned int y) {
+	print("*",  x, y, C_FG_DARK_GREY| C_BG_GREEN);
+}
+
+void game_print_zombi_mapa(unsigned int zombi) {
+	unsigned int jugador = zombi % 8;
+	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;
+	print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
+}
+
 void game_lanzar_zombi(unsigned int jugador) {
 	if (jugadores[jugador].remaining > 0 && jugadores[jugador].current < CANT_ZOMBIS) {
 		--jugadores[jugador].remaining;
 		++jugadores[jugador].current;
 
 		print_remaining(jugador);
-		unsigned int zPos = sched_lanzar_tarea(jugador);
-		tss_inicializar_zombi(jugador, jugadores[jugador].yPos, zPos % 8, 16 + zPos);
+		unsigned int zombi = sched_lanzar_tarea(jugador);
+		tss_inicializar_zombi(jugador, jugadores[jugador].yPos, zombi % 8, 16 + zombi);
 
 
 		unsigned int offset = jugadores[jugador].yPos * MAP_MEM_WIDTH;
 		memcpy(get_task_code(jugador), MAP_START + offset, PAGE_SIZE);
 
-		//zombi = jugador == JUG_A ? zPos : zPos - 8;
-		game_print_zombi_status(jugador, zPos, "/");
-		zombis[zPos].xPos = (jugador == JUG_A ? jugadores[jugador].xPos + 1 : jugadores[jugador].xPos-1);
-		zombis[zPos].yPos = jugadores[jugador].yPos;
-		zombis[zPos].type = jugadores[jugador].tipo;
+		//zombi = jugador == JUG_A ? zombi : zombi - 8;
+		game_print_zombi_status(jugador, zombi % 8, "/");
+		zombis[zombi].xPos = (jugador == JUG_A ? jugadores[jugador].xPos + 1 : jugadores[jugador].xPos-1);
+		zombis[zombi].yPos = jugadores[jugador].yPos;
+		zombis[zombi].type = jugadores[jugador].tipo;
 		unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;	
-		print(zombi_char[zombis[zPos].type],  zombis[zPos].xPos, zombis[zPos].yPos, attr);
+		print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
 	}
-
 }
 
 void game_move_current_zombi(direccion dir) {
-	breakpoint();
 	//llamar sched eso me da el juegador y la posicion
-	unsigned int jugador = (tareaActual < 8) ? JUG_A : JUG_B;
-	zombi_info zombiActual = zombis[tareaActual];
+	unsigned int tarea = sched_tarea_actual();
+	unsigned int jugador = tarea % 8;
+	// imprimir rastro zombi
+	game_print_rastro(zombis[tarea].xPos, zombis[tarea].yPos);
+	// calcular nueva pos
+	// TODO: SCORE
+	unsigned int newXPos = zombis[tarea].xPos;
+	unsigned int newYPos = zombis[tarea].yPos;
+	int mov = jugador == JUG_A ? 1 : -1;
+	switch(dir) {
+		case IZQ:
+			newYPos -= mov;
+			break;
+		case DER:
+			newYPos += mov;
+			break;
+		case ADE:
+			newXPos += mov;
+			break;
+		case ATR:
+			newXPos -= mov;
+			break;
+	}
 	// mapear correctamente
-	mmu_mover_zombi(jugador, zombiActual.xPos, zombiActual.yPos, dir);
-
-	mmu_desmapeo_zombi(jugador, zombiActual.xPos, zombiActual.yPos, tareaActual);
-
-
+	mmu_mover_zombi(jugador, zombis[tarea].xPos-1, zombis[tarea].yPos, newXPos-1, newYPos);
+	// mover zombi
+	zombis[tarea].xPos = newXPos;
+	zombis[tarea].yPos = newYPos;
+	// imprimir zombi
+	game_print_zombi_mapa(tarea);
+	// ir a idle
+	sched_marcar_idle();
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {

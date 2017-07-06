@@ -92,12 +92,67 @@ void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisi
 }
 
 void mmu_unmapear_pagina(unsigned int virtual, unsigned int cr3) {
-	pd_entry* dir_paginas = (pd_entry*) cr3;
-	unsigned int dir_i = PDE_OFFSET(virtual);
-	unsigned int tabla_i = PTE_OFFSET(virtual);
-	pt_entry* tablas = (pt_entry*) ( (unsigned int) dir_paginas[dir_i].page_addr);
-	tablas[tabla_i].p = 0; //TODO PREGUNTAR
-	tlbflush();
+	if(cr3 != 0) {
+		unsigned int dir_i = PDE_OFFSET(virtual);
+		unsigned int tabla_i = PTE_OFFSET(virtual);
+
+		pd_entry* dir = &((pd_entry*) cr3)[dir_i];
+		if(dir->p) {
+			pt_entry* tablas = (pt_entry*) ( (unsigned int) dir->page_addr << 12);
+			tablas[tabla_i].p = 0;
+			tlbflush();
+		}
+	}
+}
+
+void mmu_mapear_area_zombi(unsigned int pd, unsigned char jugador, unsigned int centro) {
+	char direccion = jugador == JUG_A ? 1 : -1;
+	mmu_mapear_pagina(TASK_VIRT, pd,
+		MAP_START + centro);
+
+	mmu_mapear_pagina(TASK_VIRT+(1*PAGE_SIZE), pd,
+		MAP_START + (centro + direccion * PAGE_SIZE));
+
+	mmu_mapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd,
+		MAP_START + (centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd,
+		MAP_START + (centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd,
+		MAP_START + (centro + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd,
+		MAP_START + (centro - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd,
+		MAP_START + (centro - direccion * PAGE_SIZE));
+
+	mmu_mapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd,
+		MAP_START + (centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
+		MAP_START + (centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+}
+
+void mmu_desmapear_area_zombi(unsigned int pd, unsigned int centro) {
+	mmu_unmapear_pagina(TASK_VIRT, pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(1*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd);
+
+	mmu_unmapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd);
 }
 
 unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea) {
@@ -107,34 +162,40 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 
 	char direccion = jugador == JUG_A ? 1 : -1;
 
-	unsigned int offset = yPos * MAP_MEM_WIDTH;
+	unsigned int centro = yPos * MAP_MEM_WIDTH;
+	if(jugador == JUG_B) {
+		centro += MAP_MEM_WIDTH - PAGE_SIZE;
+	}
 
 	mmu_mapear_pagina(TASK_VIRT, pd,
-		MAP_START + offset);
+		MAP_START + centro);
 
 	mmu_mapear_pagina(TASK_VIRT+(1*PAGE_SIZE), pd,
-		MAP_START + (offset + direccion * PAGE_SIZE));
+		MAP_START + (centro + direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd,
-		MAP_START + (offset + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + (centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
 
 	mmu_mapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd,
-		MAP_START + (offset + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + (centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
 
 	mmu_mapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd,
-		MAP_START + (offset + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + (centro + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
 
 	mmu_mapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd,
-		MAP_START + (offset - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + (centro - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+	/* NO MAPPEAR ESTAS PAGINAS AL PRINCIPIO, BORDE DEL MAPA
 
 	mmu_mapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd,
-		MAP_START + (offset - direccion * PAGE_SIZE));
+		MAP_START + (centro - direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd,
-		MAP_START + (offset - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + (centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
 
 	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
-		MAP_START + (offset - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + (centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+
+	*/
 
 	unsigned int pila3 = mmu_proxima_pagina_fisica_libre();
 	mmu_mapear_pagina(TASK_STACK_USER, pd, pila3);
@@ -146,6 +207,7 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 
 void memcpy(unsigned int src, unsigned int dest, unsigned int len) {
 	unsigned int cr3 = rcr3();
+
 	mmu_mapear_pagina(dest, cr3, dest);
 
 	char* srcp = (char*)src;
@@ -156,14 +218,25 @@ void memcpy(unsigned int src, unsigned int dest, unsigned int len) {
 	mmu_unmapear_pagina(dest, cr3);
 }
 
-void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned short dir) {}
+void memmov(unsigned int src, unsigned int dest, unsigned int len) {
+	unsigned int cr3 = rcr3();
 
-void mmu_desmapeo_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned char tarea) {}
+	mmu_mapear_pagina(src, cr3, src);
+	mmu_mapear_pagina(dest, cr3, dest);
+	char* srcp = (char*)src;
+	char* destp = (char*)dest;
+	for (unsigned int i = 0; i < len; ++i) {
+		destp[i] = srcp[i];
+	}
+	mmu_unmapear_pagina(src, cr3);
+	mmu_unmapear_pagina(dest, cr3);
+}
 
-
-
-
-
-
-
-
+void mmu_mover_zombi(unsigned char jugador, unsigned char xPos, unsigned char yPos, unsigned char newXPos, unsigned char newYpos) {
+	unsigned int centro = yPos * MAP_MEM_WIDTH + xPos * PAGE_SIZE;
+	unsigned int nuevoCentro = newYpos * MAP_MEM_WIDTH + newXPos * PAGE_SIZE;
+	memmov(MAP_START + centro, MAP_START + nuevoCentro, PAGE_SIZE);
+	unsigned int pd = rcr3();
+	mmu_desmapear_area_zombi(pd, centro);
+	mmu_mapear_area_zombi(pd, jugador, nuevoCentro);
+}

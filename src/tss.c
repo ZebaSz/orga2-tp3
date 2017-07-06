@@ -52,7 +52,7 @@ void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned c
     tss_zombi->unused5 = 0x0000;
     tss_zombi->ss = GDT_OFF_USER_DATA;
     tss_zombi->unused6 = 0x0000;
-    tss_zombi->fs = GDT_OFF_USER_DATA;
+    tss_zombi->ds = GDT_OFF_USER_DATA;
     tss_zombi->unused7 = 0x0000;
     tss_zombi->fs = GDT_OFF_USER_DATA;
     tss_zombi->unused8 = 0x0000;
