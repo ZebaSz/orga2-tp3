@@ -186,8 +186,6 @@ void game_move_current_zombi(direccion dir) {
 	zombis[tarea].yPos = newYPos;
 	// imprimir zombi
 	game_print_zombi_mapa(tarea);
-	// ir a idle
-	sched_marcar_idle();
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {

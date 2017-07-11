@@ -88,7 +88,6 @@ unsigned int sched_lanzar_tarea(unsigned int jugador) {
 
 void sched_matar_tarea_actual() {
 	status_tareas[tareaActual] = FALSE;
-	sched_marcar_idle();
 }
 
 void sched_toggle_debug() {
