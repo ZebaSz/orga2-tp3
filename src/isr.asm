@@ -203,7 +203,6 @@ global _isr33
 
 _isr33:
     pushad
-    call fin_intr_pic1
 
     in al, 0x60
     cmp al, key_debug
@@ -274,6 +273,7 @@ _isr33:
         jmp .keyboard_end
 
     .keyboard_end:
+    call fin_intr_pic1
     popad
     iret
 ;;

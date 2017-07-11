@@ -91,7 +91,7 @@
 
 /* MMU */
 /* -------------------------------------------------------------------------- */
-#define INICIO_PAGINAS_LIBRES	0x00029000
+#define INICIO_PAGINAS_LIBRES	0x100000
 #define PAGE_SIZE				0x1000
 
 /* TAREAS */

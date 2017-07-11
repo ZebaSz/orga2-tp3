@@ -20,7 +20,7 @@ void tss_inicializar() {
 
 void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned char tarea, unsigned int gdt_entry) {
     tss* tss_zombi = jugador == JUG_A ? &tss_zombisA[tarea] : &tss_zombisB[tarea];
-    tss_inicializar_gdt_entry(gdt_entry, (unsigned int) tss_zombi); 
+    tss_inicializar_gdt_entry(gdt_entry, (unsigned int) tss_zombi);
 
     gdt[gdt_entry].dpl = 0x3;
 

@@ -124,7 +124,7 @@ void game_print_rastro(unsigned int x, unsigned int y) {
 }
 
 void game_print_zombi_mapa(unsigned int zombi) {
-	unsigned int jugador = zombi % 8;
+	unsigned int jugador = zombi / 8;
 	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;
 	print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
 }
@@ -138,8 +138,10 @@ void game_lanzar_zombi(unsigned int jugador) {
 		unsigned int zombi = sched_lanzar_tarea(jugador);
 		tss_inicializar_zombi(jugador, jugadores[jugador].yPos, zombi % 8, 16 + zombi);
 
-
 		unsigned int offset = jugadores[jugador].yPos * MAP_MEM_WIDTH;
+		if(jugador == JUG_B) {
+			offset += MAP_MEM_WIDTH - PAGE_SIZE;
+		}
 		memcpy(get_task_code(jugador), MAP_START + offset, PAGE_SIZE);
 
 		//zombi = jugador == JUG_A ? zombi : zombi - 8;
@@ -155,7 +157,7 @@ void game_lanzar_zombi(unsigned int jugador) {
 void game_move_current_zombi(direccion dir) {
 	//llamar sched eso me da el juegador y la posicion
 	unsigned int tarea = sched_tarea_actual();
-	unsigned int jugador = tarea % 8;
+	unsigned int jugador = tarea / 8;
 	// imprimir rastro zombi
 	game_print_rastro(zombis[tarea].xPos, zombis[tarea].yPos);
 	// calcular nueva pos

@@ -74,6 +74,13 @@ void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisi
 		dir->p = 1;
 		dir->rw = 1;
 		dir->us = 1;
+	    dir->pwt = 0;
+	    dir->pcd = 0;
+	    dir->a = 0;
+	    dir->ign = 0;
+	    dir->ps = 0;
+	    dir->g = 0;
+	    dir->avl = 0;
 		dir->page_addr = (unsigned int)tablas >> 12;
 	}
 
