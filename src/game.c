@@ -62,6 +62,7 @@ jugador jugadores[2] = {
 };
 
 char* zombi_char[3] = {"G","M","C"};
+char* zombi_status[5] = {"-", "\\", "|", "/", "x"};
 unsigned char FONDO_JUG_A =  C_FG_WHITE | C_BG_RED;
 unsigned char FONDO_JUG_B =  C_FG_WHITE | C_BG_BLUE;
 
@@ -145,10 +146,10 @@ void game_lanzar_zombi(unsigned int jugador) {
 		memcpy(get_task_code(jugador), MAP_START + offset, PAGE_SIZE);
 
 		//zombi = jugador == JUG_A ? zombi : zombi - 8;
-		game_print_zombi_status(jugador, zombi % 8, "/");
 		zombis[zombi].xPos = (jugador == JUG_A ? jugadores[jugador].xPos + 1 : jugadores[jugador].xPos-1);
 		zombis[zombi].yPos = jugadores[jugador].yPos;
 		zombis[zombi].type = jugadores[jugador].tipo;
+		zombis[zombi].chirimbolo = 0;
 		unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;	
 		print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
 	}
@@ -230,20 +231,35 @@ void game_jugador_tecla(unsigned int value) {
 	}
 }
 
-void game_print_zombi_status(unsigned int jugador, unsigned int zombi, const char* status) {
+void game_print_clock(unsigned int zombi) {
+	if(zombi < 16) {
+		++zombis[zombi].chirimbolo;
+		if(zombis[zombi].chirimbolo > 3) {
+			zombis[zombi].chirimbolo = 0;
+		}
+		game_print_zombi_status(zombi);
+	}
+}
+
+void game_print_zombi_status(unsigned int zombi) {
+	unsigned int jugador = zombi / 8;
 	unsigned int x_off = jugador == JUG_A ? ZOMBIS_A_OFFSET : ZOMBIS_B_OFFSET;
 	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_BLACK;
-	print(status, x_off + (zombi * 2), 48, attr);
+	unsigned int chirimbolo = zombis[zombi].chirimbolo;
+	print(zombi_status[chirimbolo], x_off + ((zombi % 8)* 2), 48, attr);
 }
 
 void game_inicializar() {
 	print_zombi(JUG_A);
 	print_zombi(JUG_B);
 	for (int i = 0; i < CANT_ZOMBIS; ++i) {
+		zombis[i].chirimbolo = 4;
+		zombis[i+8].chirimbolo = 4;
+
 		print_int(i+1, 2*i + ZOMBIS_A_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
-		game_print_zombi_status(JUG_A, i, "x");
+		game_print_zombi_status(i);
 		print_int(i+1, 2*i + ZOMBIS_B_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
-		game_print_zombi_status(JUG_B, i, "x");
+		game_print_zombi_status(i + 8);
 	}
 	print_remaining(JUG_A);
 	print_remaining(JUG_B);

@@ -9,7 +9,7 @@
 
 #define TASK_PER_PLAYER 8
 #define TASK_COUNT TASK_PER_PLAYER * 2
-#define TASK_OFFSET(task) task << 3;
+#define TASK_OFFSET(task) (task + 16) << 3
 
 unsigned char modo_debug;
 
@@ -23,7 +23,7 @@ unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
 	if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
 		tarea = TASK_PER_PLAYER * jugador;
 	}
-	while(tarea != tareasAnteriores[jugador] && status_tareas[tarea] != status) {
+	for (int i = 0; i < TASK_PER_PLAYER && status_tareas[tarea] != status; ++i) {
 		++tarea;
 		if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
 			tarea = TASK_PER_PLAYER * jugador;
@@ -51,18 +51,17 @@ unsigned short sched_proximo_indice() {
 			proxTarea = sched_buscar_tarea(proximoJugador, TRUE);
 		}
 	}
-	if(proxTarea == TASK_COUNT || proxTarea == tareaActual || status_tareas[proxTarea] == FALSE) {
+	if(proxTarea == TASK_COUNT || TASK_OFFSET(proxTarea) == rtr() || status_tareas[proxTarea] == FALSE) {
 		// no se cambia tarea si: 1) no hay tarea o 2) es la unica tarea
 		proxTarea = 0;
 	} else {
 		// actualizamos la ultima tarea ejecutada por el jugador
-		tareasAnteriores[proximoJugador] = tareaActual;
+		tareasAnteriores[ultimoJugador] = tareaActual;
 		// y la tarea actual en ejecucion
 		tareaActual = proxTarea;
 		print_int(proxTarea, 10,0 , C_FG_RED);
 
 		// calculamos el offset del selector de la tarea en la gdt
-		proxTarea += 16;
 		proxTarea = TASK_OFFSET(proxTarea);
 	}
 	return proxTarea;

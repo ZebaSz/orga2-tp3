@@ -26,7 +26,7 @@ void game_jugador_cambiar_zombie(unsigned int value, unsigned int jugador);
 
 void game_jugador_tecla(unsigned int value);
 
-void game_print_zombi_status(unsigned int jugador, unsigned int zombie, const char* status);
+void game_print_zombi_status(unsigned int zombie);
 
 void game_inicializar();
 
@@ -43,6 +43,7 @@ typedef struct zombi_info_s {
 	unsigned int xPos;
 	unsigned int yPos;
 	unsigned int type;
+	unsigned int chirimbolo;
 }__attribute__((__packed__)) zombi_info;
 
 extern zombi_info zombis[];

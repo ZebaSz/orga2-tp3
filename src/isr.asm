@@ -28,6 +28,7 @@ debug_map_buffer:       resw (DEBUG_H * DEBUG_W)
 extern fin_intr_pic1
 
 ;; Sched
+extern sched_tarea_actual
 extern sched_proximo_indice
 extern sched_toggle_debug
 extern sched_lanzar_tarea
@@ -37,9 +38,7 @@ extern sched_matar_tarea_actual
 extern game_jugador_mover
 extern game_lanzar_zombi
 extern game_move_current_zombi
-
-extern game_move_current_zombi
-
+extern game_print_clock
 
 extern game_jugador_tecla
 
@@ -164,6 +163,15 @@ global _isr32
 _isr32:
     pushad
     call proximo_reloj
+
+    call sched_tarea_actual
+    cmp eax, 16
+    jge .next_task
+    push eax
+    call game_print_clock
+    pop eax
+
+    .next_task
 
     call sched_proximo_indice
     ;xor eax, eax
