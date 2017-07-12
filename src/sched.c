@@ -15,6 +15,7 @@ unsigned char modo_debug;
 
 unsigned char status_tareas[16] = {FALSE};
 unsigned int tareaActual;
+unsigned int ultimoJugador;
 unsigned int tareasAnteriores[2] = {TASK_PER_PLAYER - 1, TASK_COUNT - 1};
 
 // Buscar alguna tarea si no habia ninguna encolada
@@ -34,12 +35,6 @@ unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
 
 unsigned short sched_proximo_indice() {
 	unsigned int proxTarea = tareaActual;
-	unsigned int ultimoJugador;
-	if(proxTarea == TASK_COUNT) {
-		ultimoJugador = 1;
-	} else {
-		ultimoJugador = tareaActual / TASK_PER_PLAYER;
-	}
 	unsigned int proximoJugador = 1 - ultimoJugador;
 
 	if(modo_debug == FALSE) {
@@ -63,6 +58,7 @@ unsigned short sched_proximo_indice() {
 
 		// calculamos el offset del selector de la tarea en la gdt
 		proxTarea = TASK_OFFSET(proxTarea);
+		ultimoJugador = proximoJugador;
 	}
 	return proxTarea;
 }
@@ -73,9 +69,13 @@ void sched_inicializar() {
 
 void sched_marcar_idle() {
 	tareaActual = TASK_COUNT; // setear la tarea como invalida
+	ultimoJugador = 1;
 }
 
 unsigned int sched_tarea_actual() {
+	if(status_tareas[tareaActual] == FALSE) {
+		tareaActual = TASK_COUNT;
+	}
 	return tareaActual;
 }
 
@@ -85,8 +85,10 @@ unsigned int sched_lanzar_tarea(unsigned int jugador) {
 	return nuevaTarea;
 }
 
+// llamar esto último, la tarea muere acá
 void sched_matar_tarea_actual() {
 	status_tareas[tareaActual] = FALSE;
+    __asm __volatile("ljmp $0x68, $0" : : ); // ESTO ES UN JUMP FAR, TAREA MUERE DEFINITIVAMENTE ACA
 }
 
 void sched_toggle_debug() {

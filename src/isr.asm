@@ -51,11 +51,7 @@ global _isr%1
 
 _isr%1:
     xchg bx, bx
-    call matar_tarea
-
-    mov [sched_tarea_selector], word 0x68
-    call fin_intr_pic1
-    jmp far [sched_tarea_offset]
+    jmp matar_tarea
 
 %endmacro
 
@@ -324,9 +320,6 @@ proximo_reloj:
         
         
 matar_tarea:
-    ; MATAR TAREA AQUI
-    call sched_matar_tarea_actual
-
     ; mostrar cartel debug
     mov al, [debug_flag]
     test al, debug_on
@@ -351,4 +344,5 @@ matar_tarea:
     mov byte [debug_flag], debug_shown
 
     .tarea_muerta:
-    ret
+    call fin_intr_pic1
+    call sched_matar_tarea_actual

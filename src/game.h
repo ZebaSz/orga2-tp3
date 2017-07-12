@@ -28,6 +28,8 @@ void game_jugador_tecla(unsigned int value);
 
 void game_print_zombi_status(unsigned int zombie);
 
+void game_print_score(unsigned int jugador);
+
 void game_inicializar();
 
 typedef struct str_jugador {

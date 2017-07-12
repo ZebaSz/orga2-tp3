@@ -158,14 +158,14 @@ void game_lanzar_zombi(unsigned int jugador) {
 void game_move_current_zombi(direccion dir) {
 	//llamar sched eso me da el juegador y la posicion
 	unsigned int tarea = sched_tarea_actual();
-	unsigned int jugador = tarea / 8;
+	unsigned int owner = tarea / 8;
 	// imprimir rastro zombi
 	game_print_rastro(zombis[tarea].xPos, zombis[tarea].yPos);
 	// calcular nueva pos
 	// TODO: SCORE
 	unsigned int newXPos = zombis[tarea].xPos;
 	unsigned int newYPos = zombis[tarea].yPos;
-	int mov = jugador == JUG_A ? 1 : -1;
+	int mov = owner == JUG_A ? 1 : -1;
 	switch(dir) {
 		case IZQ:
 			newYPos -= mov;
@@ -180,13 +180,28 @@ void game_move_current_zombi(direccion dir) {
 			newXPos -= mov;
 			break;
 	}
-	// mapear correctamente
-	mmu_mover_zombi(jugador, zombis[tarea].xPos-1, zombis[tarea].yPos, newXPos-1, newYPos);
-	// mover zombi
-	zombis[tarea].xPos = newXPos;
-	zombis[tarea].yPos = newYPos;
-	// imprimir zombi
-	game_print_zombi_mapa(tarea);
+	if(newXPos == 0 || newXPos == 79) {
+		unsigned int puntoPara = newXPos == 0 ? JUG_B : JUG_A;
+		if(++jugadores[puntoPara].score == 10) {
+			// TODO: DETENER EL JUEGO, WE HAVE WINNER
+		}
+		--jugadores[owner].current;
+		if(jugadores[JUG_A].remaining == 0 && jugadores[JUG_B].remaining == 0) {
+			// TODO: DETENER EL JUEGO, DETERMINAR GANADOR
+		}
+		zombis[tarea].chirimbolo = 4;
+		game_print_score(puntoPara);
+		game_print_zombi_status(tarea);
+		sched_matar_tarea_actual();
+	} else {
+		// mapear correctamente
+		mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos, newXPos-1, newYPos);
+		// mover zombi
+		zombis[tarea].xPos = newXPos;
+		zombis[tarea].yPos = newYPos;
+		// imprimir zombi
+		game_print_zombi_mapa(tarea);
+	}
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {
@@ -249,6 +264,12 @@ void game_print_zombi_status(unsigned int zombi) {
 	print(zombi_status[chirimbolo], x_off + ((zombi % 8)* 2), 48, attr);
 }
 
+void game_print_score(unsigned int jugador) {
+	unsigned int x_off = jugador == JUG_A ? SCORE_A_OFFSET : SCORE_B_OFFSET;
+	unsigned short attr = (jugador == JUG_A ? C_BG_RED : C_BG_BLUE) | C_FG_WHITE;
+	print_int(jugadores[jugador].score, x_off, 47, attr);
+}
+
 void game_inicializar() {
 	print_zombi(JUG_A);
 	print_zombi(JUG_B);
@@ -261,8 +282,8 @@ void game_inicializar() {
 		print_int(i+1, 2*i + ZOMBIS_B_OFFSET, 46, C_FG_WHITE | C_BG_BLACK);
 		game_print_zombi_status(i + 8);
 	}
+	game_print_score(JUG_A);
+	game_print_score(JUG_B);
 	print_remaining(JUG_A);
 	print_remaining(JUG_B);
-	print_int(0, SCORE_A_OFFSET, 47, C_FG_WHITE | C_BG_RED);
-	print_int(0, SCORE_B_OFFSET, 47, C_FG_WHITE | C_BG_BLUE);
 }
