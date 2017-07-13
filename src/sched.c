@@ -24,7 +24,8 @@ unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
 	if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
 		tarea = TASK_PER_PLAYER * jugador;
 	}
-	for (int i = 0; i < TASK_PER_PLAYER && status_tareas[tarea] != status; ++i) {
+	int i;
+	for (i = 0; i < TASK_PER_PLAYER && status_tareas[tarea] != status; ++i) {
 		++tarea;
 		if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
 			tarea = TASK_PER_PLAYER * jugador;

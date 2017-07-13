@@ -288,7 +288,8 @@ void game_print_score(unsigned int jugador) {
 void game_inicializar() {
 	print_zombi(JUG_A);
 	print_zombi(JUG_B);
-	for (int i = 0; i < CANT_ZOMBIS; ++i) {
+	int i;
+	for (i = 0; i < CANT_ZOMBIS; ++i) {
 		zombis[i].chirimbolo = 4;
 		zombis[i+8].chirimbolo = 4;
 

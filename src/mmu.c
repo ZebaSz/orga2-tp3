@@ -38,7 +38,8 @@ void mmu_mapear_dir_kernel(unsigned int pd, unsigned int pt) {
 
 
 	pt_entry* tablas = (pt_entry*)pt;
-	for(unsigned int i = 0; i < 1024; i++) {
+	unsigned int i;
+	for(i = 0; i < 1024; i++) {
 		tablas[i].p = 1;
 		tablas[i].rw = 1;
 		tablas[i].us = 0;
@@ -67,7 +68,8 @@ void mmu_mapear_pagina(unsigned int virtual, unsigned int cr3, unsigned int fisi
 		tablas = (pt_entry*) ( (unsigned int) dir->page_addr << 12);
 	} else {
 		tablas = (pt_entry*) (mmu_proxima_pagina_fisica_libre());
-		for (unsigned int i = 0; i < 1024; i++){
+		unsigned int i;
+		for (i = 0; i < 1024; i++){
 			tablas[i].p = 0; 
 		}
 
@@ -216,7 +218,8 @@ void memcpy(unsigned int src, unsigned int dest, unsigned int len) {
 
 	char* srcp = (char*)src;
 	char* destp = (char*)dest;
-	for (unsigned int i = 0; i < len; ++i) {
+	unsigned int i;
+	for (i = 0; i < len; ++i) {
 		destp[i] = srcp[i];
 	}
 	mmu_unmapear_pagina(dest, cr3);
@@ -229,7 +232,8 @@ void memmov(unsigned int src, unsigned int dest, unsigned int len) {
 	mmu_mapear_pagina(dest, cr3, dest);
 	char* srcp = (char*)src;
 	char* destp = (char*)dest;
-	for (unsigned int i = 0; i < len; ++i) {
+	unsigned int i;
+	for (i = 0; i < len; ++i) {
 		destp[i] = srcp[i];
 	}
 	mmu_unmapear_pagina(src, cr3);
