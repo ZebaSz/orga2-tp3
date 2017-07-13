@@ -22,6 +22,8 @@ void game_lanzar_zombi(unsigned int jugador);
 
 void game_move_current_zombi(direccion dir);
 
+void game_matar_zombi_actual();
+
 void game_jugador_cambiar_zombie(unsigned int value, unsigned int jugador);
 
 void game_jugador_tecla(unsigned int value);
@@ -31,6 +33,8 @@ void game_print_zombi_status(unsigned int zombie);
 void game_print_score(unsigned int jugador);
 
 void game_inicializar();
+
+void game_finalizar();
 
 typedef struct str_jugador {
 	unsigned int yPos;
@@ -49,5 +53,6 @@ typedef struct zombi_info_s {
 }__attribute__((__packed__)) zombi_info;
 
 extern zombi_info zombis[];
+extern unsigned char ENDGAME;
 
 #endif  /* !__GAME_H__ */

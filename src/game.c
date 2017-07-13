@@ -65,6 +65,7 @@ char* zombi_char[3] = {"G","M","C"};
 char* zombi_status[5] = {"-", "\\", "|", "/", "x"};
 unsigned char FONDO_JUG_A =  C_FG_WHITE | C_BG_RED;
 unsigned char FONDO_JUG_B =  C_FG_WHITE | C_BG_BLUE;
+unsigned char ENDGAME = FALSE;
 
 int mod(int a, int b) {
     int r = a % b;
@@ -162,7 +163,6 @@ void game_move_current_zombi(direccion dir) {
 	// imprimir rastro zombi
 	game_print_rastro(zombis[tarea].xPos, zombis[tarea].yPos);
 	// calcular nueva pos
-	// TODO: SCORE
 	unsigned int newXPos = zombis[tarea].xPos;
 	unsigned int newYPos = zombis[tarea].yPos;
 	int mov = owner == JUG_A ? 1 : -1;
@@ -183,16 +183,10 @@ void game_move_current_zombi(direccion dir) {
 	if(newXPos == 0 || newXPos == 79) {
 		unsigned int puntoPara = newXPos == 0 ? JUG_B : JUG_A;
 		if(++jugadores[puntoPara].score == 10) {
-			// TODO: DETENER EL JUEGO, WE HAVE WINNER
+			game_finalizar();
 		}
-		--jugadores[owner].current;
-		if(jugadores[JUG_A].remaining == 0 && jugadores[JUG_B].remaining == 0) {
-			// TODO: DETENER EL JUEGO, DETERMINAR GANADOR
-		}
-		zombis[tarea].chirimbolo = 4;
 		game_print_score(puntoPara);
-		game_print_zombi_status(tarea);
-		sched_matar_tarea_actual();
+		game_matar_zombi_actual();
 	} else {
 		// mapear correctamente
 		mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos, newXPos-1, newYPos);
@@ -202,6 +196,18 @@ void game_move_current_zombi(direccion dir) {
 		// imprimir zombi
 		game_print_zombi_mapa(tarea);
 	}
+}
+
+void game_matar_zombi_actual() {
+	unsigned int tarea = sched_tarea_actual();
+	--jugadores[tarea / 8].current;
+	zombis[tarea].chirimbolo = 4;
+	game_print_zombi_status(tarea);
+	if(jugadores[JUG_A].remaining == 0 && jugadores[JUG_B].remaining == 0 &&
+		jugadores[JUG_A].current == 0 && jugadores[JUG_B].current == 0) {
+		game_finalizar();
+	}
+	sched_matar_tarea_actual();
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {
@@ -286,4 +292,22 @@ void game_inicializar() {
 	game_print_score(JUG_B);
 	print_remaining(JUG_A);
 	print_remaining(JUG_B);
+}
+
+void game_finalizar() {
+	ENDGAME = TRUE;
+	print("FIN DEL JUEGO!", 33, 18, C_FG_WHITE | C_BG_BLACK);
+	if(jugadores[JUG_B].score == jugadores[JUG_A].score) {
+		print("EMPATE!", 37, 20, C_FG_WHITE | C_BG_BLACK);
+	} else {
+		int ganador;
+		if(jugadores[JUG_B].score < jugadores[JUG_A].score) {
+			ganador = JUG_A;
+		} else {
+			ganador = JUG_B;
+		}
+		print("GANADOR: ", 35, 20, C_FG_WHITE | C_BG_BLACK);
+		print(ganador == JUG_A ? "A" : "B", 44, 20, C_FG_WHITE | (ganador == JUG_A ? C_BG_RED : C_BG_BLUE));
+	}
+	sched_matar_tarea_actual();
 }

@@ -32,15 +32,16 @@ extern sched_tarea_actual
 extern sched_proximo_indice
 extern sched_toggle_debug
 extern sched_lanzar_tarea
-extern sched_matar_tarea_actual
 
 ;; Juego
 extern game_jugador_mover
 extern game_lanzar_zombi
 extern game_move_current_zombi
 extern game_print_clock
+extern game_matar_zombi_actual
 
 extern game_jugador_tecla
+extern ENDGAME
 
 ;;
 ;; Definición de MACROS
@@ -50,7 +51,7 @@ extern game_jugador_tecla
 global _isr%1
 
 _isr%1:
-    xchg bx, bx
+    ;xchg bx, bx
     jmp matar_tarea
 
 %endmacro
@@ -158,6 +159,9 @@ global _isr32
 
 _isr32:
     pushad
+    test byte [ENDGAME], 1
+    jnz .end
+
     call proximo_reloj
 
     call sched_tarea_actual
@@ -207,10 +211,12 @@ global _isr33
 
 _isr33:
     pushad
+    test byte [ENDGAME], 1
+    jnz .keyboard_end
 
     in al, 0x60
     cmp al, key_debug
-    je .toggle_debug ;  MODO DEBUG DESHABILITADO
+    je .toggle_debug
 
     cmp al, key_a_up
     je .move_jugador
@@ -345,4 +351,4 @@ matar_tarea:
 
     .tarea_muerta:
     call fin_intr_pic1
-    call sched_matar_tarea_actual
+    call game_matar_zombi_actual
