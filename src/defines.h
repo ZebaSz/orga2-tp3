@@ -105,8 +105,7 @@
 #define TASK_IDLE               0x16000
 
 #define TASK_VIRT               0x08000000
-#define TASK_STACK_USER         0x0800a000
-#define TASK_STACK_KERNEL       0x0800b000
+#define TASK_STACK_KERNEL       0x0800a000
 
 /* MAPA */
 /* -------------------------------------------------------------------------- */
