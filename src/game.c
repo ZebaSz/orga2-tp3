@@ -61,7 +61,7 @@ jugador jugadores[2] = {
 	}
 };
 
-char* zombi_char[3] = {"G","M","C"};
+char* zombi_char[4] = {"G","M","C", "x"};
 char* zombi_status[5] = {"-", "\\", "|", "/", "x"};
 unsigned char FONDO_JUG_A =  C_FG_WHITE | C_BG_RED;
 unsigned char FONDO_JUG_B =  C_FG_WHITE | C_BG_BLUE;
@@ -126,9 +126,11 @@ void game_print_rastro(unsigned int x, unsigned int y) {
 }
 
 void game_print_zombi_mapa(unsigned int zombi) {
-	unsigned int jugador = zombi / 8;
-	unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;
-	print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
+	if(zombis[zombi].xPos % 79 != 0) {
+		unsigned int jugador = zombi / 8;
+		unsigned short attr = (jugador == JUG_A ? C_FG_RED : C_FG_BLUE) | C_BG_GREEN;
+		print(zombi_char[zombis[zombi].type],  zombis[zombi].xPos, zombis[zombi].yPos, attr);
+	}
 }
 
 void game_lanzar_zombi(unsigned int jugador) {
@@ -180,12 +182,16 @@ void game_move_current_zombi(direccion dir) {
 			newXPos -= mov;
 			break;
 	}
+	// ajustar para vuelta al mapa
+	newYPos = mod(newYPos - 1, 44) + 1;
 	if(newXPos == 0 || newXPos == 79) {
 		unsigned int puntoPara = newXPos == 0 ? JUG_B : JUG_A;
 		if(++jugadores[puntoPara].score == 10) {
 			game_finalizar();
 		}
 		game_print_score(puntoPara);
+		zombis[tarea].xPos = newXPos;
+		zombis[tarea].yPos = newYPos;
 		game_matar_zombi_actual();
 	} else {
 		// mapear correctamente
@@ -202,7 +208,9 @@ void game_matar_zombi_actual() {
 	unsigned int tarea = sched_tarea_actual();
 	--jugadores[tarea / 8].current;
 	zombis[tarea].chirimbolo = 4;
+	zombis[tarea].type = 3; //ded
 	game_print_zombi_status(tarea);
+	game_print_zombi_mapa(tarea);
 	if(jugadores[JUG_A].remaining == 0 && jugadores[JUG_B].remaining == 0 &&
 		jugadores[JUG_A].current == 0 && jugadores[JUG_B].current == 0) {
 		game_finalizar();
