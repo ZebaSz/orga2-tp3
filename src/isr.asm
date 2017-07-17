@@ -39,10 +39,11 @@ extern game_lanzar_zombi
 extern game_move_current_zombi
 extern game_print_clock
 extern game_matar_zombi_actual
-
 extern game_jugador_tecla
 extern ENDGAME
 
+;; Debug
+extern idt_debug_mode
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
@@ -52,6 +53,7 @@ global _isr%1
 
 _isr%1:
     ;xchg bx, bx
+    ;push %1
     jmp matar_tarea
 
 %endmacro
@@ -243,7 +245,7 @@ _isr33:
     jmp .keyboard_end
 
     .toggle_debug:
-        xchg bx, bx
+        ;xchg bx, bx
 
         mov al, [debug_flag]
         test al, (debug_shown | debug_on)
@@ -253,12 +255,12 @@ _isr33:
         ; disable_debug
         ; copiar buffer de video viejo
         mov byte [debug_flag], debug_off
-        call sched_toggle_debug
+        ;call sched_toggle_debug
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
-        call sched_toggle_debug
+        ;call sched_toggle_debug
         jmp .keyboard_end
 
     .move_jugador:
@@ -324,12 +326,37 @@ proximo_reloj:
                 popad
         ret
         
+
+get_eip: 
+    mov eax, [esp]
+    ret
         
 matar_tarea:
     ; mostrar cartel debug
+    push esp ; push stack
+    pushad ; push registers
+    xchg bx, bx
+
     mov al, [debug_flag]
     test al, debug_on
     jz .tarea_muerta
+    
+    push cs ; push segmentos 
+    push ds
+    push es
+    push fs
+    push gs
+    push ss
+
+    call get_eip
+    push eax ; push eip
+
+    str eax
+    shr eax, 3
+    push eax ; push tr
+    push esp ; push variable para usar en el debug mode
+    call idt_debug_mode
+
     ;     ; copiamos mapa viejo a buffer
     ;     mov esi, 80 * 2 ; ancho de una fila de video
     ;     mov edx, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
@@ -350,5 +377,6 @@ matar_tarea:
     mov byte [debug_flag], debug_shown
 
     .tarea_muerta:
+    popad
     call fin_intr_pic1
     call game_matar_zombi_actual

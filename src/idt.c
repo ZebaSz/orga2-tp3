@@ -8,6 +8,7 @@
 #include "defines.h"
 #include "idt.h"
 #include "isr.h"
+#include "colors.h"
 
 #include "tss.h"
 
@@ -69,4 +70,42 @@ void idt_inicializar() {
     IDT_ENTRY(102);
     // int 0x66 debe ser accesible desde ring 3
     idt[102].attr = (unsigned short) 0xEE00;
+}
+
+void idt_debug_mode(unsigned int* informacion) {
+    print_int(tareaActual, 40,44,C_FG_BLACK | C_BG_LIGHT_GREY);
+
+    print("TAREA", 40, 40, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print_hex(*informacion, 8, 40, 42, C_FG_BLACK | C_BG_LIGHT_GREY);
+    informacion++;
+
+    print("eip", 0, 16, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print_hex(*informacion, 8, 8, 16, C_FG_BLACK | C_BG_LIGHT_GREY);
+    informacion++;
+
+    char * segmentos[] = {"cs", "ds", "es", "fs", "gs", "ss"};
+    for(int i = 5; i>=0; i--) {
+        print(segmentos[i], 20, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*informacion, 4, 28, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        informacion++;
+    }
+
+    char * registros_comunes[] = {"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"};
+    for(int i = 7; i>=0; i--) {
+        print(registros_comunes[i], 0, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*informacion, 8, 8, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        informacion++;
+    }
+
+    char * stack = "STACK";
+    print(stack, 20, 13, C_FG_BLACK | C_BG_LIGHT_GREY);
+    for(int i = 1; i < 5; i++) {
+        print_hex(*informacion, 8, 20, 15 + i, C_FG_BLACK | C_BG_LIGHT_GREY);
+        informacion++;
+    }
+
+
+
+
+    
 }
