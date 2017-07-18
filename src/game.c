@@ -143,9 +143,9 @@ void game_lanzar_zombi(unsigned int jugador) {
 
 		print_remaining(jugador);
 		unsigned int zombi = sched_lanzar_tarea(jugador);
-		tss_inicializar_zombi(jugador, jugadores[jugador].yPos, zombi % 8, 16 + zombi);
+		tss_inicializar_zombi(jugador, jugadores[jugador].yPos-1, zombi % 8, 16 + zombi);
 
-		unsigned int offset = jugadores[jugador].yPos * MAP_MEM_WIDTH;
+		unsigned int offset = (jugadores[jugador].yPos-1) * MAP_MEM_WIDTH;
 		if(jugador == JUG_B) {
 			offset += MAP_MEM_WIDTH - PAGE_SIZE;
 		}
@@ -196,7 +196,7 @@ void game_move_current_zombi(direccion dir) {
 		game_matar_zombi_actual();
 	} else {
 		// mapear correctamente
-		mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos, newXPos-1, newYPos);
+		mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos-1, newXPos-1, newYPos-1);
 		// mover zombi
 		zombis[tarea].xPos = newXPos;
 		zombis[tarea].yPos = newYPos;
