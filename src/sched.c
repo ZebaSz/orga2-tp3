@@ -92,6 +92,10 @@ void sched_matar_tarea_actual() {
     __asm __volatile("ljmp $0x68, $0" : : ); // ESTO ES UN JUMP FAR, TAREA MUERE DEFINITIVAMENTE ACA
 }
 
+unsigned char sched_modo_debug() {
+	return modo_debug;
+}
+
 void sched_toggle_debug() {
 	if(modo_debug == FALSE) {
 		modo_debug = TRUE;

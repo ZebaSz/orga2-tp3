@@ -36,6 +36,12 @@ void game_inicializar();
 
 void game_finalizar();
 
+void game_debug_info(unsigned int* informacion);
+
+void game_debug_show();
+
+void game_debug_close();
+
 typedef struct str_jugador {
 	unsigned int yPos;
 	unsigned int xPos;

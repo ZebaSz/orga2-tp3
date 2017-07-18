@@ -6,6 +6,10 @@
 
 #include "game.h"
 
+unsigned int mapa_backup[80*25];
+
+unsigned int debug_info[18];
+
 zombi_info zombis[16] = {
 	[0] = (zombi_info) {
 	},	
@@ -216,7 +220,110 @@ void game_matar_zombi_actual() {
 		jugadores[JUG_A].current == 0 && jugadores[JUG_B].current == 0) {
 		game_finalizar();
 	}
+	if(sched_modo_debug()) {
+		//copio mapa dsp de matar tarea
+		unsigned int* video = (unsigned int*) VIDEO;
+    	for(unsigned int i = 0; i< 80*25; i++) {
+       		mapa_backup[i] = video[i];
+    	}
+  		//breakpoint();
+	    game_debug_show();
+	}
 	sched_matar_tarea_actual();
+}
+
+void game_debug_close() {
+	unsigned int* video = (unsigned int*)VIDEO;
+    for(unsigned int i = 0; i< 80*25; i++) {
+        video[i] = mapa_backup[i];
+    }
+}
+
+void game_debug_info(unsigned int* informacion) {
+	for(int i = 0; i < 18; i++) {
+		debug_info[i] = informacion[i];
+	}
+	sched_toggle_debug();
+
+}
+
+void game_debug_show() {
+
+	unsigned int* info = (unsigned int*) debug_info;
+
+    char * exceptions[] = {"Divide Error",
+        "RESERVED",
+        "NMI Interrupt",
+        "Breakpoint",
+        "Overflow",
+        "BOUND Range Exceeded",
+        "Invalid Opcode",
+        "Device Not Available",
+        "Double Fault",
+        "Coprocessor Segment Overrun",
+        "Invalid TSS",
+        "Segment not present",
+        "Stack-Segment Fault",
+        "General Protection",
+        "Page Fault",
+        "Reserved",
+        "x87 FPU Foating-Point Error",
+        "Alignment Check",
+        "Machine Check",
+        "SIMD Floating-Point Exception"
+    };
+
+    unsigned int tarea = sched_tarea_actual();
+    unsigned int owner = tarea / 8;
+    char* tipo;
+    switch(zombis[tarea].type) {
+            case ZOMBI_TYPE_G:
+                tipo = "Guerrero";
+                break;
+            case ZOMBI_TYPE_M:
+                tipo = "Mago";
+                break;
+            case ZOMBI_TYPE_C:
+                tipo = "Clerigo";
+                break;
+            default:
+                tipo = "Unknown";    
+    }
+    char* jugador = owner == 0 ? "Zombie A " : "Zombie B ";
+    print(jugador, 40, 40, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print(tipo, 49, 40, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print_int(zombis[tarea].type, 40, 42, C_FG_BLACK | C_BG_LIGHT_GREY );
+
+    print("eip", 0, 16, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print_hex(*info, 8, 8, 16, C_FG_BLACK | C_BG_LIGHT_GREY);
+    info++;
+
+    char * segmentos[] = {"cs", "ds", "es", "fs", "gs", "ss"};
+    for(int i = 5; i>=0; i--) {
+        print(segmentos[i], 20, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*info, 4, 24, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        info++;
+    }
+
+    char * registros_comunes[] = {"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"};
+    for(int i = 7; i>=0; i--) {
+        print(registros_comunes[i], 0, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*info, 8, 4, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        info++;
+    }
+
+    unsigned int* stack = info;
+    info++;
+    print("Stack: ", 20, 12, C_FG_BLACK | C_BG_LIGHT_GREY);
+    for(int i = 0; i<4; i++) {
+        print("[        ]", 29, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);    
+        print_hex((unsigned int)stack, 8, 20, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*stack, 8, 30, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
+        stack++;
+    }
+
+    print("Exception: ", 40, 39, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print(exceptions[*info], 50, 39, C_FG_BLACK | C_BG_LIGHT_GREY);
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {
