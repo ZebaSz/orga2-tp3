@@ -77,6 +77,7 @@ BITS 32
     mov ds, ax ; kernel data segment
     mov es, ax
     mov gs, ax
+    mov ss, ax
 
     mov ax, 1111000b ; index = 15 | gdt = 0 | rpl = 0 
     mov fs, ax ; video segment

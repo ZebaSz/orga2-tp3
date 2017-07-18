@@ -109,7 +109,7 @@ void tss_inicializar_idle() {
 }
 
 void tss_inicializar_gdt_entry(unsigned int index, unsigned int base) {
-    gdt[index].limit_0_15 = 0x0068;
+    gdt[index].limit_0_15 = 0x0067;
     gdt[index].base_0_15 = base & 0xFFFF;
     gdt[index].base_23_16 = (base >> 16) & 0xFF;
     gdt[index].type = 0x9;
