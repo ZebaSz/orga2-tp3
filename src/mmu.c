@@ -12,6 +12,11 @@
 
 unsigned int proxima_pagina_libre; //TODO: ver cual es la inicializacion: suponemos 0x29000 que puede ser la primera libre
 
+int mem_mod(int a, int b) {
+    int r = a % b;
+    return r < 0 ? r + b : r;
+}
+
 void mmu_inicializar() {
 	proxima_pagina_libre = INICIO_PAGINAS_LIBRES;
 }
@@ -123,25 +128,25 @@ void mmu_mapear_area_zombi(unsigned int pd, unsigned char jugador, unsigned int 
 		MAP_START + (centro + direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * MAP_MEM_WIDTH, MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * MAP_MEM_WIDTH, MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd,
 		MAP_START + (centro - direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH), MAP_MEM_SIZE));
 }
 
 void mmu_desmapear_area_zombi(unsigned int pd, unsigned int centro) {
@@ -183,26 +188,26 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 		MAP_START + (centro + direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(2*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * (PAGE_SIZE + MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(3*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * (PAGE_SIZE - MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(4*PAGE_SIZE), pd,
-		MAP_START + (centro + direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro + direccion * MAP_MEM_WIDTH, MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(5*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * MAP_MEM_WIDTH) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * MAP_MEM_WIDTH, MAP_MEM_SIZE));
 	/* NO MAPPEAR ESTAS PAGINAS AL PRINCIPIO, BORDE DEL MAPA
 
 	mmu_mapear_pagina(TASK_VIRT+(6*PAGE_SIZE), pd,
 		MAP_START + (centro - direccion * PAGE_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(7*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * (PAGE_SIZE + MAP_MEM_WIDTH), MAP_MEM_SIZE));
 
 	mmu_mapear_pagina(TASK_VIRT+(8*PAGE_SIZE), pd,
-		MAP_START + (centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH)) % MAP_MEM_SIZE);
+		MAP_START + mem_mod(centro - direccion * (PAGE_SIZE - MAP_MEM_WIDTH), MAP_MEM_SIZE);
 
 	*/
 	unsigned int pila0 = mmu_proxima_pagina_fisica_libre();
