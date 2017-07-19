@@ -341,7 +341,7 @@ matar_tarea:
     pushad ; push registers
 
     mov eax, esp
-    sub eax, 10 * 4
+    sub eax, 11 * 4 ; aca deberia estar el eip
     push eax ; push eip
 
     mov eax, cr0
