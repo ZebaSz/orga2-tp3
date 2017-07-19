@@ -5,3 +5,11 @@
 *.tsk
 *.bin
 *.sym
+
+# Cosas de latex
+*.out
+*.log
+*.aux
+*.toc
+*.synctex.gz
+informe/informe.pdf

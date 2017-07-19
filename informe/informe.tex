@@ -1,0 +1,55 @@
+\documentclass[10pt, a4paper, spanish]{article}
+\usepackage[paper=a4paper, left=1.5cm, right=1.5cm, bottom=1.5cm, top=3.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{caratula}
+\usepackage[pdfencoding=auto, colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage[boxruled, longend]{algorithm2e}
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usepackage[rightcaption]{sidecap}
+\usetikzlibrary{babel}
+
+\tikzset{nodeList/.style={every node/.style={draw, circle}}}
+\tikzset{pathList/.style={every node/.style={midway, fill=white}}}
+
+\begin{document}
+
+% CARATULA
+\materia{Organización del Computador II}
+\submateria{Primer Cuatrimestre de 2017}
+\fecha{\today}
+\grupo{Grupo ``InSisto gEnio zen acaba''}
+\titulo{Trabajo Práctico 3}
+
+\integrante{Bonggio, Enzo}{074/15}{ebonggio@dc.uba.ar}
+\integrante{Szperling, Sebastián Ariel}{763/15}{sszperling@dc.uba.ar}
+\integrante{Tarrío, Ignacio}{363/15}{itarrio@dc.uba.ar}
+
+\maketitle
+
+\tableofcontents
+
+\pagebreak
+
+\input{ejercicios/ej1}
+\pagebreak
+\input{ejercicios/ej2}
+\pagebreak
+\input{ejercicios/ej3}
+\pagebreak
+\input{ejercicios/ej4}
+\pagebreak
+\input{ejercicios/ej5}
+\pagebreak
+\input{ejercicios/ej6}
+\pagebreak
+\input{ejercicios/ej7}
+\pagebreak
+\input{apendice}
+
+
+% compilar 2 veces para actualizar las referencias
+
+
+\end{document}
