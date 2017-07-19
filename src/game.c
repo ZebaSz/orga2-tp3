@@ -310,6 +310,12 @@ void game_debug_info(unsigned int* informacion) {
 }
 
 void game_debug_show() {
+	unsigned int DEBUG_REGISTROS_X = 26;
+	unsigned int DEBUG_REGISTROS_Y = 9;
+	unsigned int DEBUG_INFO_X = 25;
+	unsigned int DEBUG_INFO_Y = 7;	
+
+
 	char * info_jugador;
 	char * info_tipo;
     switch(debug_info_tipo) {
@@ -325,32 +331,43 @@ void game_debug_show() {
     }
     info_jugador = debug_info_jugador == 0 ? "Zombie A " : "Zombie B ";
 
+
+    //dibujo bordes negros
+    //for() {
+
+    //}
+    //pinto interior
+    //for() {
+
+    //}
     
-    print(info_jugador, 40, 40, C_FG_BLACK | C_BG_LIGHT_GREY);
-    print(info_tipo, 49, 40, C_FG_BLACK | C_BG_LIGHT_GREY);
+    //imprimo excepcion, tipo de zombie y tipo de jugador
+    print(info_jugador, DEBUG_INFO_X, DEBUG_INFO_Y, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print(info_tipo, DEBUG_INFO_X + 9, DEBUG_INFO_Y, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print(exceptions[debug_info_error], DEBUG_INFO_X + 20, DEBUG_INFO_Y, C_FG_BLACK | C_BG_LIGHT_GREY);
 
+
+    //imprimo segmentos
     for(int i = 5; i >= 0; i--) {
-        print(segmentos[i], 20, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(debug_info_segmentos[i], 4, 24, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-    	breakpoint();
+        print(segmentos[i], DEBUG_REGISTROS_X + 20, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(debug_info_segmentos[i], 4, DEBUG_REGISTROS_X + 24, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
     }
 
+    //imprimo registros comunes
     for(int i = 8; i >= 0; i--) {
-        print(registros_comunes[i], 0, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(debug_info_regsitros[i], 8, 4, i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-    	breakpoint();
+        print(registros_comunes[i], DEBUG_REGISTROS_X, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(debug_info_regsitros[i], 8, DEBUG_REGISTROS_X + 4, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
     }
 
-    print("Stack: ", 20, 12, C_FG_BLACK | C_BG_LIGHT_GREY);
+    //imprimo stack
+    print("Stack: ", DEBUG_REGISTROS_X + 20, DEBUG_REGISTROS_Y + 12, C_FG_BLACK | C_BG_LIGHT_GREY);
     for(int i = 0; i<4; i++) {
-        print("[        ]", 29, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);    
-        print_hex((unsigned int)debug_info_stack, 8, 20, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(*debug_info_stack, 8, 30, i + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print("[        ]", DEBUG_REGISTROS_X + 29, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);    
+        print_hex((unsigned int)debug_info_stack, 8, DEBUG_REGISTROS_X + 20, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(*debug_info_stack, 8, DEBUG_REGISTROS_X + 30, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
         debug_info_stack++;
     }
 
-    print("Exception: ", 40, 39, C_FG_BLACK | C_BG_LIGHT_GREY);
-    print(exceptions[debug_info_error], 50, 39, C_FG_BLACK | C_BG_LIGHT_GREY);
 }
 
 void game_jugador_cambiar_zombi(unsigned int value, unsigned int jugador) {
