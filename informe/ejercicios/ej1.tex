@@ -1,1 +1,43 @@
 \section{Ejercicio 1: GDT, Segmentos y Modo Protegido}
+
+	\subsection{Descriptores de segmentos}
+
+	Por las restricciones pedidas en el TP, nuestros descriptores comienzan en índice 8 de la GDT. El esquema utilizado es de segmentación \textit{flat}, con la excepción del segmento de video que solo es utilizado al dibujar el mapa por primera vez. PAra cumplir los requisitos, se definieron los segmentos como descriptores en la GDT de la siguiente manera:
+
+	\begin{center}
+		\begin{tabular}{ | c | c | c | c | c | c | }
+		\hline
+		Índice &                      Base &                   Límite &                  DPL & Tipo &                  G \\ \hline
+		     8 & \multirow{4}{*}{0x000000} & \multirow{4}{*}{0x26EFF} & \multirow{2}{*}{0x0} &  0xA & \multirow{4}{*}{1} \\ \cline{5-5}
+		     9 &                           &                          &                      &  0x2 &                    \\ \cline{4-5}
+		    10 &                           &                          & \multirow{2}{*}{0x3} &  0xA &                    \\ \cline{5-5}
+		    11 &                           &                          &                      &  0x2 &                    \\ \cline{2-6}
+		    15 &                   0xB8000 &                   0x13F3 &                  0x0 &  0x2 &                  0 \\
+		\hline
+		\end{tabular}
+	\end{center}
+
+	Los niveles de privilegio corresponden a kernel (\texttt{0x0}) y a usuario/tarea (\texttt{0x3}), mientras que los tipos corresponden a código con lectura (\texttt{0xA}) y a datos con lectura/escritura (\texttt{0x2}).
+
+	Todos los segmentos, además, están marcados como presentes (\texttt{p=1}) y de 32 bits (\texttt{db=1}). Los primeros 4 segmentos abarcan en total 623MB, mientras que el segmento de video solo ocupa lo necesario para escribir el buffer en su totalidad ($80 \times 50 \times 2$ bytes).
+
+	\begin{figure}[h]
+		\centering
+		%\resizebox{\textwidth}{!}{
+			\renewcommand{\arraystretch}{1.5}
+			\begin{tabular}{ *{31}{|c}|c|}
+				\multicolumn{1}{l}{31} & \multicolumn{6}{c}{} & \multicolumn{1}{r}{24} & \multicolumn{1}{c}{23} & \multicolumn{1}{c}{22} & \multicolumn{1}{c}{21} & \multicolumn{1}{c}{20} & \multicolumn{1}{l}{19} & \multicolumn{2}{c}{} & \multicolumn{1}{r}{16} & \multicolumn{1}{c}{15} & \multicolumn{1}{l}{14} & \multicolumn{1}{r}{13} & \multicolumn{1}{c}{12} & \multicolumn{1}{c}{11} & \multicolumn{2}{c}{} & \multicolumn{1}{c}{8} & \multicolumn{1}{l}{7} &\multicolumn{6}{c}{} & \multicolumn{1}{r}{0} \\
+				\hline
+				\multicolumn{8}{|c|}{0x00} & 1 & 1 & 0 & 0 & \multicolumn{4}{|c|}{0x2} & 1 & \multicolumn{2}{|c|}{0x2} & 1 & \multicolumn{4}{|c|}{0xA} & \multicolumn{8}{|c|}{0x00} \\
+				\hline
+				\multicolumn{32}{c}{} \\
+
+				\multicolumn{1}{l}{31} & \multicolumn{14}{c}{} & \multicolumn{1}{r}{16} & \multicolumn{1}{l}{15} & \multicolumn{14}{c}{} & \multicolumn{1}{r}{0} \\
+				\hline
+				\multicolumn{16}{|c|}{0x0000} & \multicolumn{16}{|c|}{0x6EFF} \\
+				\hline
+			\end{tabular}
+			\renewcommand{\arraystretch}{1}
+		%}
+		\caption{Ejemplo de descriptor de GDT: segmento de código de kernel}
+	\end{figure}
