@@ -340,10 +340,9 @@ matar_tarea:
     push esp ; push stack
     pushad ; push registers
 
-    mov al, [debug_flag]
-    test al, debug_on
-    jz .tarea_muerta
-    
+    call get_eip
+    push eax ; push eip
+
     push cs ; push segmentos 
     push ds
     push es
@@ -351,33 +350,17 @@ matar_tarea:
     push gs
     push ss
 
-    call get_eip
-    push eax ; push eip
+    mov al, [debug_flag]
+    test al, debug_on
+    jz .tarea_muerta
 
-    push esp ; push variable para usar en el debug mode
-    call game_debug_info
-    add esp, 9*4
-    ;xchg bx, bx
-    ;     ; copiamos mapa viejo a buffer
-    ;     mov esi, 80 * 2 ; ancho de una fila de video
-    ;     mov edx, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
-    ;     xor ebx, ebx
-    ;     .copiar_fila
-    ;         xor ecx, ecx
-    ;         mov eax, edx
-    ;         .copiar_punto
-    ;             mov edi, [eax + 2 * ecx]
-    ;             mov [eax + 2 * ecx], 
+    xchg bx, bx
 
-    ;     ; dibujamos dialogo debug
-    ;     mov eax, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
-    ;     xor ebx, ebx
-    ;     .dibujar_fila
-    ;         xor ecx, ecx
+    push esp ; push array con toda la info de los registros
+    call game_debug_info ; contenido de los registros para mostrarlos luego
 
     mov byte [debug_flag], debug_shown
 
     .tarea_muerta:
-    add esp, 9*4
     call fin_intr_pic1
     call game_matar_zombi_actual
