@@ -52,7 +52,7 @@ extern ENDGAME
 global _isr%1
 
 _isr%1:
-    ;xchg bx, bx
+    xchg bx, bx
     push %1
     jmp matar_tarea
 
@@ -87,10 +87,10 @@ isrmensaje_4_len:    equ $ - isrmensaje_4
 isrmensaje_5:        db 'BOUND Range Exceeded (5)'
 isrmensaje_5_len:    equ $ - isrmensaje_5
 
-isrmensaje_6:        db 'Invalid Opcode (Undefined Opcode) (6)'
+isrmensaje_6:        db 'Invalid Opcode (6)'
 isrmensaje_6_len:    equ $ - isrmensaje_6
 
-isrmensaje_7:        db 'Device Not Available (No Math Coprocessor) (7)'
+isrmensaje_7:        db 'Device Not Available (7)'
 isrmensaje_7_len:    equ $ - isrmensaje_7
 
 isrmensaje_8:        db 'Double Fault (8)'
@@ -117,7 +117,7 @@ isrmensaje_14_len:   equ $ - isrmensaje_14
 isrmensaje_15:       db 'reserved (15)'
 isrmensaje_15_len:   equ $ - isrmensaje_15
 
-isrmensaje_16:       db 'x87 FPU Foating-Point Error (Math Fault) (16)'
+isrmensaje_16:       db 'x87 FPU Foating-Point Error (16)'
 isrmensaje_16_len:   equ $ - isrmensaje_16
 
 isrmensaje_17:       db 'Alignment Check (17)'
@@ -340,8 +340,18 @@ matar_tarea:
     push esp ; push stack
     pushad ; push registers
 
-    call get_eip
+    mov eax, esp
+    sub eax, 10 * 4
     push eax ; push eip
+
+    mov eax, cr0
+    push eax
+    mov eax, cr2
+    push eax
+    mov eax, cr3
+    push eax
+    mov eax, cr4
+    push eax
 
     push cs ; push segmentos 
     push ds
@@ -354,10 +364,8 @@ matar_tarea:
     test al, debug_on
     jz .tarea_muerta
 
-    xchg bx, bx
-
     push esp ; push array con toda la info de los registros
-    call game_debug_info ; contenido de los registros para mostrarlos luego
+    call game_debug_info ; guarda contenido de los registros para mostrarlos luego
 
     mov byte [debug_flag], debug_shown
 
