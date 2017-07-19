@@ -41,3 +41,38 @@
 		%}
 		\caption{Ejemplo de descriptor de GDT: segmento de código de kernel}
 	\end{figure}
+
+	Dado que nuestros segmentos ocupan 623MB, antes de cargar la GDT debimos activar la linea A20.
+
+	\subsection{Salto a modo protegido}
+
+	Para pasar de modo real a modo protegido y configurar la pila del kernel, debimos:
+
+	\begin{enumerate}
+		\item Setear el bit CR0.PE:
+
+		\texttt{mov eax, cr0}\\
+		\texttt{or eax, 1}\\
+		\texttt{mov cr0, eax}
+
+		\item Inmediatamente realizar un jump far con selector 0x40 (índice 8 de la GDT, código de kernel):
+    
+		\texttt{jmp 0x40:modoprotegido}
+		
+		\item Configurar los registros de selectores con 0x48 (índice 9 de la GDT, datos de kernel), salvo por \texttt{fs} que fue seteado a 0x78 (índice 15 de la GDT, segmento de video):
+
+		\texttt{xor eax, eax}\\
+		\texttt{mov ax, 1001000b ; index = 9 | gdt = 0 | rpl = 0}\\
+		\texttt{mov ds, ax}\\
+		\texttt{mov es, ax}\\
+		\texttt{mov gs, ax}\\
+		\texttt{mov ss, ax}\\
+		\texttt{mov ax, 1111000b ; index = 15 | gdt = 0 | rpl = 0}
+		\texttt{mov fs, ax}
+
+		\item Por úlitmo, settear la pila a la dirección correspondiente:
+
+		\texttt{mov ebp, 0x27000}\\
+		\texttt{mov esp, 0x27000}
+
+	\end{enumerate}
