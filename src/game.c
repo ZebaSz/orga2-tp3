@@ -116,6 +116,7 @@ unsigned int debug_info_regsitros[13] = {};
 unsigned int * debug_info_stack;
 unsigned int debug_info_error;
 unsigned char debug_info_jugador;
+unsigned int debug_info_eflags;
 unsigned char debug_info_tipo;
 
 char* zombi_char[4] = {"G","M","C", "x"};
@@ -307,6 +308,8 @@ void game_debug_info(unsigned int* informacion) {
 	}
 	debug_info_stack = (unsigned int*)informacion[19];	
 	debug_info_error = informacion[20];
+	debug_info_eflags = informacion[21];
+	print_hex(debug_info_eflags, 8, 0,0,C_FG_WHITE );
 	sched_toggle_debug();
 }
 
@@ -367,23 +370,28 @@ void game_debug_show() {
     //imprimo segmentos
     for(int i = 0; i < 6; i++) {
         print(segmentos[i], DEBUG_REGISTROS_X + 20, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(debug_info_segmentos[i], 4, DEBUG_REGISTROS_X + 24, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(debug_info_segmentos[i], 4, DEBUG_REGISTROS_X + 24, DEBUG_REGISTROS_Y + i*2, C_FG_WHITE | C_BG_LIGHT_GREY);
     }
 
     //imprimo registros comunes
     for(int i = 0; i < 13; i++) {
         print(registros_comunes[i], DEBUG_REGISTROS_X, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(debug_info_regsitros[i], 8, DEBUG_REGISTROS_X + 4, DEBUG_REGISTROS_Y + i*2, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex(debug_info_regsitros[i], 8, DEBUG_REGISTROS_X + 4, DEBUG_REGISTROS_Y + i*2, C_FG_WHITE | C_BG_LIGHT_GREY);
     }
 
     //imprimo stack
     print("Stack: ", DEBUG_REGISTROS_X + 20, DEBUG_REGISTROS_Y + 12, C_FG_BLACK | C_BG_LIGHT_GREY);
     for(int i = 0; i < 4; i++) {
         print("[        ]", DEBUG_REGISTROS_X + 29, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);    
-        print_hex((unsigned int)debug_info_stack, 8, DEBUG_REGISTROS_X + 20, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
-        print_hex(*debug_info_stack, 8, DEBUG_REGISTROS_X + 30, i + DEBUG_REGISTROS_Y + 14, C_FG_BLACK | C_BG_LIGHT_GREY);
+        print_hex((unsigned int)debug_info_stack, 8, DEBUG_REGISTROS_X + 20, i + DEBUG_REGISTROS_Y + 14, C_FG_WHITE | C_BG_LIGHT_GREY);
+        print_hex(*debug_info_stack, 8, DEBUG_REGISTROS_X + 30, i + DEBUG_REGISTROS_Y + 14, C_FG_WHITE | C_BG_LIGHT_GREY);
         debug_info_stack++;
     }
+
+    //imprimo eflags
+    print("eflags", DEBUG_REGISTROS_X + 20, DEBUG_REGISTROS_Y + 20, C_FG_BLACK | C_BG_LIGHT_GREY);
+    print_hex(debug_info_eflags, 8, DEBUG_REGISTROS_X + 27, DEBUG_REGISTROS_Y +20, C_FG_WHITE | C_BG_LIGHT_GREY);
+
 
 }
 
