@@ -18,8 +18,6 @@ debug_flag:             db 0x0
 %define DEBUG_W         30
 %define DEBUG_H         36
 
-debug_map_buffer:       resw (DEBUG_H * DEBUG_W)
-
 %define debug_off       00b
 %define debug_on        01b
 %define debug_shown     10b
@@ -32,6 +30,7 @@ extern sched_tarea_actual
 extern sched_proximo_indice
 extern sched_toggle_debug
 extern sched_lanzar_tarea
+extern sched_matar_tarea_actual
 
 ;; Juego
 extern game_jugador_mover
@@ -52,9 +51,7 @@ extern ENDGAME
 global _isr%1
 
 _isr%1:
-    lea eax, [esp + 4 * 3]
-    push dword [eax] ; push eflags
-    push %1
+    push dword %1
     jmp matar_tarea
 
 %endmacro
@@ -163,7 +160,12 @@ global _isr32
 _isr32:
     pushad
     test byte [ENDGAME], 1
-    jnz .end
+    jz .switch_task
+    .clock_end:
+    hlt
+    jmp .clock_end
+
+    .switch_task:
 
     call proximo_reloj
 
@@ -174,7 +176,7 @@ _isr32:
     call game_print_clock
     pop eax
 
-    .next_task
+    .next_task:
 
     call sched_proximo_indice
     ;xor eax, eax
@@ -249,15 +251,12 @@ _isr33:
     jmp .keyboard_end
 
     .toggle_debug:
-        ;xchg bx, bx
-
         mov al, [debug_flag]
         test al, (debug_shown | debug_on)
         jz .enable_debug
         test al, debug_shown
         jz .keyboard_end
         ; disable_debug
-        ; copiar buffer de video viejo
         mov byte [debug_flag], debug_off
         call sched_toggle_debug
         call game_debug_close
@@ -265,7 +264,6 @@ _isr33:
 
         .enable_debug:
         mov byte [debug_flag], debug_on
-        ;call sched_toggle_debug
         jmp .keyboard_end
 
     .move_jugador:
@@ -338,11 +336,15 @@ get_eip:
         
 matar_tarea:
     ; mostrar cartel debug
-    push esp ; push stack
     pushad ; push registers
+    
+    call game_matar_zombi_actual
 
-    lea eax, [esp + 4 * 15]
-    push dword [eax] ; push eip
+    mov al, [debug_flag]
+    test al, debug_on
+    jz .tarea_muerta
+
+    sub esp, 4 ; espacio para eip
 
     mov eax, cr0
     push eax
@@ -360,16 +362,13 @@ matar_tarea:
     push gs
     push ss
 
-    mov al, [debug_flag]
-    test al, debug_on
-    jz .tarea_muerta
-
-    ;xchg bx, bx
     push esp ; push array con toda la info de los registros
     call game_debug_info ; guarda contenido de los registros para mostrarlos luego
+
+    call sched_toggle_debug ; dejar de conmutar tareas
 
     mov byte [debug_flag], debug_shown
 
     .tarea_muerta:
     call fin_intr_pic1
-    call game_matar_zombi_actual
+    call sched_matar_tarea_actual

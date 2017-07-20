@@ -252,6 +252,7 @@ void game_move_current_zombi(direccion dir) {
 		}
 		game_print_score(puntoPara);
 		game_matar_zombi_actual();
+		sched_matar_tarea_actual();
 	} else {
 		// mapear correctamente
 		mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos-1, newXPos-1, newYPos-1);
@@ -267,6 +268,10 @@ void game_matar_zombi_actual() {
 	unsigned int tarea = sched_tarea_actual();
 	--jugadores[tarea / 8].current;
 	zombis[tarea].chirimbolo = 4;
+
+	// guardamos el tipo del zombi por si es necesario
+	debug_info_tipo = zombis[tarea].type;
+
 	zombis[tarea].type = 3; //ded
 	game_print_zombi_status(tarea);
 	game_print_zombi_mapa(tarea);
@@ -274,16 +279,6 @@ void game_matar_zombi_actual() {
 		jugadores[JUG_A].current == 0 && jugadores[JUG_B].current == 0) {
 		game_finalizar();
 	}
-	if(sched_modo_debug()) {
-		//copio mapa dsp de matar tarea
-		unsigned int* video = (unsigned int*) VIDEO;
-    	for(unsigned int i = 0; i< 80*25; i++) {
-       		mapa_backup[i] = video[i];
-    	}
-  		//breakpoint();
-	    game_debug_show();
-	}
-	sched_matar_tarea_actual();
 }
 
 void game_debug_close() {
@@ -297,7 +292,6 @@ void game_debug_close() {
 void game_debug_info(unsigned int* informacion) {
 	//guardo info de la tarea actual
 	debug_info_jugador = sched_tarea_actual() / 8;
-	debug_info_tipo = zombis[sched_tarea_actual()].type;
 
 	//guardo la info de los registros
 	for(int i = 0;i < 6; i ++) {
@@ -306,25 +300,22 @@ void game_debug_info(unsigned int* informacion) {
 	for(int i = 0;i < 13; i++) {
 		debug_info_regsitros[i] = informacion[18 - i];
 	}
-	debug_info_stack = (unsigned int*)informacion[19];	
-	debug_info_error = informacion[20];
-	debug_info_eflags = informacion[21];
-	print_hex(debug_info_eflags, 8, 0,0,C_FG_WHITE );
-	sched_toggle_debug();
-}
+	debug_info_error = informacion[19];
 
-void game_debug_show() {
-	unsigned int DEBUG_REGISTROS_X = 26;
-	unsigned int DEBUG_REGISTROS_Y = 9;
-	unsigned int DEBUG_INFO_X = 25;
-	unsigned int DEBUG_INFO_Y = 7;
-	
-	unsigned int DEBUG_CORNER_X = 24;
-	unsigned int DEBUG_CORNER_Y = 6;
+	// salteamos informacion[20], error code
+	debug_info_regsitros[8] = informacion[21]; // corregimos EIP
+	debug_info_segmentos[0] = informacion[22]; // corregimos CS
+	debug_info_eflags = informacion[23];
+	debug_info_regsitros[4] = informacion[24]; // corregimos ESP
+	debug_info_stack = (unsigned int*) informacion[24];
+	debug_info_segmentos[5] = informacion[25]; // corregimos SS
 
-	unsigned int DEBUG_WIDTH = 42;
-	unsigned int DEBUG_HEIGHT = 36; 
 
+	//copio mapa dsp de matar tarea
+	unsigned int* video = (unsigned int*) VIDEO;
+	for(unsigned int i = 0; i< 80*25; i++) {
+   		mapa_backup[i] = video[i];
+	}
 
 	char * info_jugador;
 	char * info_tipo;

@@ -42,6 +42,18 @@
 #define ZOMBI_TYPE_M            1
 #define ZOMBI_TYPE_C            2
 
+
+#define DEBUG_REGISTROS_X 26
+#define DEBUG_REGISTROS_Y 9
+#define DEBUG_INFO_X 25
+#define DEBUG_INFO_Y 7
+
+#define DEBUG_CORNER_X 24
+#define DEBUG_CORNER_Y 6
+
+#define DEBUG_WIDTH 42
+#define DEBUG_HEIGHT 36
+
 /* Indices en la gdt */
 /* -------------------------------------------------------------------------- */
 #define GDT_COUNT 32
