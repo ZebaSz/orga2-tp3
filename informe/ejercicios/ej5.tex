@@ -1,7 +1,7 @@
 \section{Ejercicio 5: Interrupciones de reloj y teclado}
 
-	\subsection{Rutina de atencion a reloj}
-	Dentro de la rutina del reloj se encuentra el codigo que proporcionan la concurrencia de tareas.
+	\subsection{Rutina de atención a reloj}
+	Dentro de la rutina del reloj se encuentra el código que proporcionan la concurrencia de tareas.
 
 	\begin{lstlisting}
 	sched_tarea_offset:     dd 0x00
@@ -40,25 +40,25 @@
 	    iret
 	\end{lstlisting}
 
-	Para lograr la concurrencia realizamos una llamada al scheduler, explicado en mayor detalle en el ejercicio 6, el cual nos devuelve cual sera la proxima tarea a ejecutar. En caso de que no halla que realizar un cambio de tarea volvemos con \textit{iret}. 
+	Para lograr la concurrencia realizamos una llamada al scheduler, explicado en mayor detalle en el ejercicio 6, el cual nos devuelve cual sera la próxima tarea a ejecutar. En caso de que no halla que realizar un cambio de tarea volvemos con \textit{IRET}. 
 
-	Ademas tambien el reloj deja de realizar la concurrencia entre tareas si el juego terminó. En este punto tambien actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla. 
+	Ademas también el reloj deja de realizar la concurrencia entre tareas si el juego terminó. En este punto también actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla. 
 
-	Por ultimo, nos ocupamos de resetear el pic para poder recibir otra interrupcion de lejos. Esto lo realizamos sea en caso de cambiar de tarea o de permanecer en la misma.
+	Por ultimo, nos ocupamos de resetear el pic para poder recibir otra interrupción de lejos. Esto lo realizamos sea en caso de cambiar de tarea o de permanecer en la misma.
 
-	\subsection{Rutina de atencion a teclado}
-	Las interrupciones del teclado nos dan la posibilidad de poder elegir y lanzar tareas, pero tambien nos permiten activar y desactivar el modo debug del cual daremos mas detalles en el ejercicio 7.
+	\subsection{Rutina de atención a teclado}
+	Las interrupciones del teclado nos dan la posibilidad de poder elegir y lanzar tareas, pero también nos permiten activar y desactivar el modo debug del cual daremos mas detalles en el ejercicio 7.
 
 	Tenemos en cuenta dos eventos a la hora de activar o desactivar la posibilidad de lanzar tareas o elegirlas, estas son: 
 	\begin{itemize}
-		\item{el final de juego la cual anula por completo la posibilidad de lanzar o cambiar el zombie.}
+		\item{el final de juego la cual anula por completo la posibilidad de lanzar o cambiar el zombi.}
 
-		\item{y ademas cuando el cartel de debug se esta mostrando no se permite hacer ninguna accion, salvo desactivar el cartel para poder seguir jugando.}
+		\item{y ademas cuando el cartel de debug se esta mostrando no se permite hacer ninguna acción, salvo desactivar el cartel para poder seguir jugando.}
 	\end{itemize}
 
-	No se tomo en cuenta los codigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupcion los codigos de las teclas \textit{A, S, W, X, lShift} para el \texttt{jugador A} y \textit{J, K, I, M, rShift} para el \texttt{jugador B}, ademas contamos con la tecla \textit{Y} para activar el modo debug caso contrario la interrupcion no realiza ninguna accion.
+	No se tomo en cuenta los códigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupción los códigos de las teclas \textit{A, S, W, X, lShift} para el \texttt{jugador A} y \textit{J, K, I, M, rShift} para el \texttt{jugador B}, ademas contamos con la tecla \textit{Y} para activar el modo debug caso contrario la interrupcion no realiza ninguna acción.
 
-	Al final de la interrupcion se debe resetear el pic para poder recibir nuevamente una interrupcion mediente el siguiente call a funcion :
+	Al final de la interrupción se debe resetear el pic para poder recibir nuevamente una interrupción mediante el siguiente call a función :
 
 	\begin{lstlisting}
 		extern fin_intr_pic1
