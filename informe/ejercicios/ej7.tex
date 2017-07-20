@@ -1,1 +1,19 @@
 \section{Ejercicio 7: scheduling, servicio mover y modo debug}
+
+
+\subsection{Servicio mover}
+	Las tareas cuentan con una unica manera de comunicarse con el kernel, esto lo logran realizando una interrupcion a \texttt{0x66} indicando  en eax hacia donde quiere moverse la tarea.
+
+	Para lograr esto dentro de la rutina de atencion a la interrupcion realizamos las siguientes acciones:
+
+	\begin{itemize}
+		\item{Pintar el rastro del zombie, es decir el lugar donde esta actualmente con un (*).}
+		\item{Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombie es y a quien pertenece. Utilizar dicha informacion para dibujar la nueva ubicacion del zombie.}
+		\item{Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.}
+		\item{Caso contrario mapear y desmapear las paginas del zombie. Primero desmapear el area actual y luego mapear las nuevas paginas.}
+		\item{Saltar a idle.}
+	\end{itemize}
+
+	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la proxima tarea a ejecutar.
+
+\subsection{Modo debug}	
