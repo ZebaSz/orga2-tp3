@@ -26,7 +26,7 @@
 	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la próxima tarea a ejecutar.
 
 	\subsection{Modo debug}
-	Si el modo debug se encuentra activado, esto se realiza presionando la tecla \textit{Y}, el juego pasará a mostrar la siguiente excepción que se produzca en pantalla. Para lograr dicho cometido en la sección de manejo de excepciones se guarda de la información de todos los registros de uso común, los segmentos, la excepción que se disparo. Solo cuando el modo debug esta activado entonces esta información es pasada al juego el cual la almacena para poder usarla en un paso posterior.
+	Si el modo debug se encuentra activado (mediante la tecla \textit{Y}) el juego pasará a mostrar la siguiente excepción que se produzca en pantalla. Para lograr dicho cometido en la sección de manejo de excepciones se guarda de la información de todos los registros de uso común, los segmentos, la excepción que se disparo. Solo cuando el modo debug esta activado entonces esta información es pasada al juego el cual la almacena para poder usarla en un paso posterior.
 
 	Guardamos la información del mapa y mostramos la información de la excepción en un paso intermedio entre indicarle al scheduler que la tarea no se encuentra mas activa y saltar a idle (los pasos que se realizan al eliminar una tarea se encuentran en el ejercicio 2).
 
@@ -54,13 +54,12 @@ _isr33:
 
         ; disable_debug
         mov byte [debug_flag], debug_off
-        call sched_toggle_debug
-        call game_debug_close ; call para dibujar el mapa que teniamos guardado en memoria
+        call sched_toggle_debug ; indicar al scheduler que debe conmutar tareas nuevamente
+        call game_debug_close ; restaurar el estado del mapa pre-debug
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
-        ;call sched_toggle_debug
         jmp .keyboard_end
     ...
 	\end{lstlisting}

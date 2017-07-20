@@ -1,5 +1,7 @@
 \section{Ejercicio 5: Interrupciones de reloj y teclado}
 
+    EStas dos interrupciones tienen 2 detalles en común: por un lado, deben ser ignoradas si el juego finalizó, lo cual se señaliza con la dirección de memoria ENDGAME (fin de juego); por el otro, en ambos casos debemos reiniciar el PIC al finalizar la atención a la interrupción para poder atender fururas interrupciones.
+
 	\subsection{Rutina de atención a reloj}
 
 	Dentro de la rutina del reloj se encuentra el código encargado de la conmutación de tareas:
@@ -45,8 +47,6 @@ _isr32:
 
 	En este punto también actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla, además del reloj global del sistema. Si el juego terminó, el sistema deja de conmutar tareas.
 
-	Por último, nos ocupamos de resetear el PIC para poder recibir las siguientes interrupción. Esto lo realizamos siempre, más allá de si realiza un cambio de tarea o no.
-
 	\subsection{Rutina de atención a teclado}
 
 	Las interrupciones del teclado nos dan la posibilidad de poder elegir y lanzar tareas, pero también nos permiten activar y desactivar el modo debug del cual daremos mas detalles en el ejercicio 7.
@@ -60,4 +60,4 @@ _isr32:
 
 	No se tomo en cuenta los códigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupción los códigos de las teclas \textit{A, S, W, X, L\_Shift} para el \texttt{jugador A} y \textit{J, K, I, M, R\_Shift} para el \texttt{jugador B}, ademas contamos con la tecla \textit{Y} para activar el modo debug caso contrario la interrupcion no realiza ninguna acción.
 
-	Como con la interrupción del reloj, se debe resetear el PIC para poder recibir nuevamente una interrupción.
+    Si el juego terminó, el input del usuario debe ser ignorado, y el sistema debe ser reiniciado.
