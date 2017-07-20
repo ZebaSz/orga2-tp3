@@ -1,14 +1,14 @@
 \section{Ejercicio 7: scheduling, servicio mover y modo debug}
 
 
-\subsection{Servicio mover}
-	Las tareas cuentan con una unica manera de comunicarse con el kernel, esto lo logran realizando una interrupcion a \texttt{0x66} indicando  en eax hacia donde quiere moverse la tarea.
+	\subsection{Servicio mover}
+	Las tareas cuentan con una unica manera de comunicarse con el kernel, esto lo logran realizando una interrupcion a \texttt{0x66} indicando en \textit{eax} hacia donde quiere moverse la tarea.
 
 	Para lograr esto dentro de la rutina de atencion a la interrupcion realizamos las siguientes acciones:
 
 	\begin{itemize}
 		\item{Pintar el rastro del zombie, es decir el lugar donde esta actualmente con un (*).}
-		\item{Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombie es y a quien pertenece. Utilizar dicha informacion para dibujar la nueva ubicacion del zombie.}
+		\item{Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombie es y a quien pertenece. Ademas sabemos hacia donde se va a mover chequeando el registro \textit{eax}. Utilizar dicha informacion para dibujar la nueva ubicacion del zombie.}
 		\item{Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.}
 		\item{Caso contrario mapear y desmapear las paginas del zombie. Primero desmapear el area actual y luego mapear las nuevas paginas.}
 		\item{Saltar a idle.}
@@ -16,4 +16,46 @@
 
 	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la proxima tarea a ejecutar.
 
-\subsection{Modo debug}	
+	\subsection{Modo debug}
+	Si el modo debug se encuentra activado, esto se realiza presionando la tecla \textit{Y}, el juego pasará a mostrar la siguiente excepcion que se produzca en pantalla. Para lograr dicho cometido en la seccion de manejo de excepciones se guarda de la informacion de todos los registros de uso comun, los segmentos, la excepcion que se disparo. Solo cuando el modo debug esta activado entonces esta informacion es pasada al juego el cual la almacena para poder usarla en un paso posterior.
+
+	Guardamos la informacion del mapa y mostramos la informacion de la excepcion en un paso intermedio entre indicarle al scheduler que la tarea no se encuentra mas activa y saltar a idle (los pasos que se realizan al eliminar una tarea se encuentrar en el ejercicio 2).
+
+	Salir del modo debug:
+
+	\begin{lstlisting}
+
+_isr33:
+
+    in al, 0x60
+    cmp al, key_debug
+    je .toggle_debug
+
+    test byte [debug_flag], debug_shown
+    jnz .keyboard_end
+
+    ...
+
+    .toggle_debug:
+        ;xchg bx, bx
+
+        mov al, [debug_flag]
+        test al, (debug_shown | debug_on)
+        jz .enable_debug
+        test al, debug_shown
+        jz .keyboard_end
+        ; disable_debug
+        mov byte [debug_flag], debug_off
+        call sched_toggle_debug
+        call game_debug_close; call para dibujar el mapa que teniamos guardado en memoria
+        jmp .keyboard_end
+
+        .enable_debug:
+        mov byte [debug_flag], debug_on
+        ;call sched_toggle_debug
+        jmp .keyboard_end
+
+    ...
+	\end{lstlisting}
+
+	Para poder salir del modo debug y continuar el juego debemos presionar nuevamente la tecla \textit{Y}, cuando lo hacemos dibujamos nuevamente la pantalla con la informacion que estaba guardada y el scheduler buscara la proxima tarea a ejecutar.
