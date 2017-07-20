@@ -48,31 +48,39 @@
 
 	Para pasar de modo real a modo protegido y configurar la pila del kernel, debimos:
 
+	\lstset{escapechar=@,style=asm}
 	\begin{enumerate}
-		\item Setear el bit CR0.PE:
+		\item Setear el bit CR0.PE (bit 0):
 
-		\texttt{mov eax, cr0}\\
-		\texttt{or eax, 1}\\
-		\texttt{mov cr0, eax}
+		\begin{lstlisting}
+mov eax, cr0
+or eax, 1
+mov cr0, eax
+		\end{lstlisting}
 
 		\item Inmediatamente realizar un jump far con selector 0x40 (índice 8 de la GDT, código de kernel):
     
-		\texttt{jmp 0x40:modoprotegido}
+		\begin{lstlisting}
+jmp 0x40:modoprotegido
+		\end{lstlisting}
 		
 		\item Configurar los registros de selectores con 0x48 (índice 9 de la GDT, datos de kernel), salvo por \texttt{fs} que fue seteado a 0x78 (índice 15 de la GDT, segmento de video):
 
-		\texttt{xor eax, eax}\\
-		\texttt{mov ax, 1001000b ; index = 9 | gdt = 0 | rpl = 0}\\
-		\texttt{mov ds, ax}\\
-		\texttt{mov es, ax}\\
-		\texttt{mov gs, ax}\\
-		\texttt{mov ss, ax}\\
-		\texttt{mov ax, 1111000b ; index = 15 | gdt = 0 | rpl = 0}
-		\texttt{mov fs, ax}
+		\begin{lstlisting}
+mov ax, 1001000b ; index = 9 | gdt = 0 | rpl = 0
+mov ds, ax
+mov es, ax
+mov gs, ax
+mov ss, ax
+mov ax, 1111000b ; index = 15 | gdt = 0 | rpl = 0
+mov fs, ax
+		\end{lstlisting}
 
-		\item Por úlitmo, settear la pila a la dirección correspondiente:
+		\item Por úlitmo, setear la pila a la dirección correspondiente:
 
-		\texttt{mov ebp, 0x27000}\\
-		\texttt{mov esp, 0x27000}
+		\begin{lstlisting}
+mov ebp, 0x27000
+mov esp, 0x27000
+		\end{lstlisting}
 
 	\end{enumerate}

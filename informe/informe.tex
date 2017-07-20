@@ -4,16 +4,36 @@
 \usepackage[spanish]{babel}
 \usepackage{caratula}
 \usepackage[pdfencoding=auto, colorlinks=true, linkcolor=blue]{hyperref}
-\usepackage[boxruled, longend]{algorithm2e}
 \usepackage{graphicx}
 \usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{tikz}
-\usepackage[rightcaption]{sidecap}
-\usetikzlibrary{babel}
+\usepackage{listings}
+\usepackage{color}
 
-\tikzset{nodeList/.style={every node/.style={draw, circle}}}
-\tikzset{pathList/.style={every node/.style={midway, fill=white}}}
+\definecolor{green}{rgb}{0,0.6,0}
+\definecolor{blue}{rgb}{0,0,0.6}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{pink}{rgb}{0.8,0,0.4}
+
+\lstdefinestyle{c}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  language=C,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green},
+  commentstyle=\itshape\color{gray},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\lstdefinestyle{asm}{
+  belowcaptionskip=1\baselineskip,
+  xleftmargin=\parindent,
+  language=[x86masm]Assembler,
+  basicstyle=\footnotesize\ttfamily\color{green},
+  keywordstyle=\bfseries\color{pink},
+  commentstyle=\itshape\color{gray},
+}
 
 \begin{document}
 

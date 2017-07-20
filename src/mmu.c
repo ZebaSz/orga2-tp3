@@ -42,20 +42,20 @@ void mmu_mapear_dir_kernel(unsigned int pd, unsigned int pt) {
 	dir_paginas[0].page_addr = pt >> 12;
 
 
-	pt_entry* tablas = (pt_entry*)pt;
+	pt_entry* tabla = (pt_entry*)pt;
 	unsigned int i;
 	for(i = 0; i < 1024; i++) {
-		tablas[i].p = 1;
-		tablas[i].rw = 1;
-		tablas[i].us = 0;
-		tablas[i].pwt = 0;
-		tablas[i].pcd = 0;
-		tablas[i].a = 0;
-		tablas[i].d = 0;
-		tablas[i].pat = 0;
-		tablas[i].g = 0;
-		tablas[i].avl = 0;
-		tablas[i].page_addr = i;
+		tabla[i].p = 1;
+		tabla[i].rw = 1;
+		tabla[i].us = 0;
+		tabla[i].pwt = 0;
+		tabla[i].pcd = 0;
+		tabla[i].a = 0;
+		tabla[i].d = 0;
+		tabla[i].pat = 0;
+		tabla[i].g = 0;
+		tabla[i].avl = 0;
+		tabla[i].page_addr = i;
 	}
 }
 

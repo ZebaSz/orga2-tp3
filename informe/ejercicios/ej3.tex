@@ -1,1 +1,83 @@
 \section{Ejercicio 3: Paginación y mapa de páginas del Kernel}
+
+	\subsection{Mapeo de páginas del kernel}
+
+	El kernel ocupa 1MB de memoria, con 3MB adicionales de area libre. Por ende, este area exactamente en el espacio de una tabla de páginas completa.
+
+	Dado que todas las tareas deben tener este area mapeada igual que el kernel (con \textit{identity mapping}), creamos una función genérica para mappear el kernel que toma un page directory y un page table como parámetros:
+
+
+	\lstset{escapechar=@,style=c}
+	\begin{lstlisting}
+void mmu_mapear_dir_kernel(unsigned int pd, unsigned int pt) {
+	pd_entry* dir_paginas = (pd_entry*) pd;
+	dir_paginas[0].p = 1; // bit presente
+	dir_paginas[0].rw = 1; // incluye codigo y datos, read/write
+	dir_paginas[0].us = 0; // area de kernel - privilegio supervisor
+	dir_paginas[0].pwt = 0;
+	dir_paginas[0].pcd = 0;
+	dir_paginas[0].a = 0;
+	dir_paginas[0].ign = 0;
+	dir_paginas[0].ps = 0;
+	dir_paginas[0].g = 0;
+	dir_paginas[0].avl = 0;
+	dir_paginas[0].page_addr = pt >> 12; // apunta a la base de la tabla de paginas
+
+	pt_entry* tabla = (pt_entry*)pt;
+	unsigned int i;
+	for(i = 0; i < 1024; i++) {
+		// mismos atributos que en la PDE
+		tabla[i].p = 1;
+		tabla[i].rw = 1;
+		tabla[i].us = 0;
+		tabla[i].pwt = 0;
+		tabla[i].pcd = 0;
+		tabla[i].a = 0;
+		tabla[i].d = 0;
+		tabla[i].pat = 0;
+		tabla[i].g = 0;
+		tabla[i].avl = 0;
+		tabla[i].page_addr = i; // igual que el indice para identity mapping
+	}
+}
+	\end{lstlisting}
+
+	Esto asegura que todo el area del kernel está presente y mapeada por \textit{identity mapping} con permisos de supervisor. De este modo, para configurar los mapeos del kernel, alcanza con llamar a:
+
+	\begin{lstlisting}
+void mmu_inicializar_dir_kernel() {
+	mmu_mapear_dir_kernel(0x27000, 0x28000);
+}
+	\end{lstlisting}
+
+	siendo estas las direcciones del directorio y la tabla de páginas del kernel definidas por la cátedra.
+
+	\subsection{Habilitado de paginación}
+
+	Para habilitar el sistema de paginación, debimos:
+
+	\lstset{escapechar=@,style=asm}
+	\begin{enumerate}
+
+		\item Inicializar el directorio de páginas del kernel como se explicó en el punto anterior:
+
+		\begin{lstlisting}
+call mmu_inicializar_dir_kernel
+		\end{lstlisting}
+
+		\item Cargar el directorio de páginas al registro CR3:
+
+		\begin{lstlisting}
+mov eax, 0x27000
+mov cr3, eax
+		\end{lstlisting}
+
+		\item Setear el bit CR0.PG (bit 31):
+
+		\begin{lstlisting}
+mov eax, cr0
+or eax, 0x80000000
+mov cr0, eax
+		\end{lstlisting}
+
+	\end{enumerate}
