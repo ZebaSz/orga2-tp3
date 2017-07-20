@@ -1,5 +1,10 @@
 \section{Ejercicio 7: scheduling, servicio mover y modo debug}
+    
+    \subsection{Inicialización del scheduler}
 
+    Para hacer funcionar el scheduler debimos asegurarnos de tener las interrupciones activadas con el PIC configurado para poder recibir las interrupciones del reloj. Esto se inicializa antes de saltar a la tarea Idle por primera vez.
+
+    Adicionalmente, el scheduler se inicializa con tareas inválida, ya que el mismo mantiene el número de la última tarea ejecutada para cada jugador. Los valores inválidos omiten ciertos procesos como el dibujado del reloj de la tarea actual (la tarea Idle maneja su propio reloj).
 
 	\subsection{Servicio mover}
 	Las tareas cuentan con una única manera de comunicarse con el kernel, esto lo logran realizando una interrupción a \texttt{0x66} indicando en \textit{eax} hacia donde quiere moverse la tarea.
@@ -41,24 +46,22 @@ _isr33:
     ...
 
     .toggle_debug:
-        ;xchg bx, bx
-
         mov al, [debug_flag]
         test al, (debug_shown | debug_on)
         jz .enable_debug
         test al, debug_shown
         jz .keyboard_end
+
         ; disable_debug
         mov byte [debug_flag], debug_off
         call sched_toggle_debug
-        call game_debug_close; call para dibujar el mapa que teniamos guardado en memoria
+        call game_debug_close ; call para dibujar el mapa que teniamos guardado en memoria
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
         ;call sched_toggle_debug
         jmp .keyboard_end
-
     ...
 	\end{lstlisting}
 

@@ -4,6 +4,7 @@
 
 	Para poder tener acceso a la \textit{IDT} se requiere de un descriptor que indique el lugar donde se encuentra el arreglo con las entradas de atención a interrupciones. 
 
+	\lstset{escapechar=@,style=c}
 	\begin{lstlisting}
 idt_descriptor IDT_DESC = {
 	sizeof(idt) - 1,
@@ -21,6 +22,7 @@ idt_descriptor IDT_DESC = {
 
 	En el caso de una excepción, nuestro sistema debe desalojar la tarea actual y saltar nuevamente a la tarea Idle. Para atender las excepciones usamos el macro provisto por la cátedra:
 
+	\lstset{escapechar=@,style=asm}
 	\begin{lstlisting}
 %macro ISR 1
 global _isr%1

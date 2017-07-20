@@ -1,6 +1,77 @@
 \section{Ejercicio 6: TSSs y salto a tarea Idle}
-Dado que el sistema corre concurrentemente varias tareas, necesitamos alguna forma de mantener el contexto de las tareas que estén en pausa. Para esto, podemos guardar en la GDT los descriptores de TSS para cada una zombie y una para la tarea idle y definir una TSS a la que apuntan estos descriptores, aunque estas no se van a inicializar hasta que se cree la tarea. También hay que tener en cuenta que cuando saltamos por primera vez a una tarea el procesador va a intentar guardar el contexto por lo que tenemos que crear una TSS para este salto, notemos que el contenido del contexto no nos interesa.
 
-Para la tarea idle se reservó el índice 13 de la GDT, y la tss de la tarea se configuró con la pila apuntando a donde se encuentra el kernel, el cr3 del kernel y el eip apuntando a donde se encuentra la tarea, en cuanto al descriptor se colocó el DPL en 0 y al ocupar un tamaño menor a 1mb, el bit G también se colocó en 0.
+	\subsection{Entradas en la GDT}
 
-Al inicializar las tareas zombies vamos a inicializar el descriptor de TSS de la tarea con DPL nivel 3 y apuntará a la tss que nos otorga el arreglo de TSSs, según qué número de tarea para el jugador. En cuanto a la TSS, el CR3 está dado por lo que retorna la función de inicialización de la memoria del zombie, para los selectores de segmento DS, ES, FS, GS, los seteamos como el selector de datos nivel usuario, el CS como selector de código nivel usuario, como queremos que las interrupciones estén habilitadas, vamos a setear los flags con el bit correspondiente activo (0x202).
+	Para saltar a las distintas tareas, definimos un total de 18 entradas en la GDT correspondientes a cada TSS. Las mismas tienen todas los mismos atributos: son de sistema, tipo 0x9, con límite 0x68. La dirección base de cada TSS está definida por 2 posiciones constantes (para la inicial y la Idle) y 2 dos arreglos (para las tareas zombi).
+
+	Para que todas las entradas entren cómodamente en la GDT, aumentamos su tamaño a 32. Sin embargo, podría reducirse a 30 si 1) usamos un espacio en blanco que dejamos para linear los números y 2) utilizamos la TSS de una tarea zombi como TSS inicial.
+
+	\subsection{Inicialización de las TSSs}
+
+	La TSS de la tarea inicial no hace falta inicializarla ya que solo utiliza como dummy para poder saltar a la "siguiente" (primera) tarea, la Idle. Por ende, sus valores nunca son leídos, solo escritos.
+
+	La TSS Idle se inicializa con los siguientes valores:
+
+	\begin{itemize}
+		\item \texttt{CS = 0x40} (segmento de código del kernel)
+
+		\item \texttt{DS, ES, FS, GS, SS, SS0 = 0x48} (segmento de datos del kernel)
+
+		\item \texttt{ESP, EBP, ESP0 = 0x27000} (base de pila del kernel)
+
+		\item \texttt{CR3 = 0x27000} (directorio de páginas del kernel)
+
+		\item \texttt{EIP = 0x10000} (base de la tarea Idle)
+	\end{itemize}
+
+	En cuanto a las tareas zombi, sus TSSs se inicializan de la siguiente manera:
+
+	\begin{itemize}
+		\item \texttt{CS = 0x53} (segmento de código de usuario, con DPL 3)
+
+		\item \texttt{DS, ES, FS, GS, SS = 0x5B} (segmento de datos de usuario, con DPL 3)
+
+		\item \texttt{ESP, EBP = 0x08001000} (límite de página virtual de la tarea)
+
+		\item \texttt{SS0 = 0x48} (segmento de datos del kernel)
+
+		\item \texttt{ESP0 = 0x0800b000} (límite de dirección virtual mapeada a pagina nueva)
+
+		\item \texttt{CR3 = mmu\_inicializar\_dir\_zombi} (directorio creado durante la inicialización, ver sección 4.2)
+
+		\item \texttt{EIP = 0x08000000} (base de página virtual de la tarea)
+
+	\end{itemize}
+
+	La base de la página designada para el stack de nivel 0 (ESP0) se ubica en \texttt{0x0800a000}.
+
+	Para todas las tareas, los registros generales se inicializan en 0, el mapa de I/0 en \texttt{0xFFFF} y los \texttt{EFLAGS} en \texttt{0x202} (interrupciones activadas).
+
+	\subsection{Salto a tarea Idle}
+
+	Para saltar a la primera tarea debimos:
+
+	\lstset{escapechar=@,style=asm}
+	\begin{enumerate}
+
+		\item Inicializar las TSSs y agregarlas a la GDT:
+
+		\begin{lstlisting}
+call tss_inicializar
+call tss_inicializar_idle
+		\end{lstlisting}
+
+		\item Cargar la TSS inicial como "tarea actual":
+
+		\begin{lstlisting}
+mov ax, 0x60
+ltr ax
+		\end{lstlisting}
+
+		\item Hacer un jump far (task switch) a la tarea Idle:
+
+		\begin{lstlisting}
+jmp 0x68:0
+		\end{lstlisting}
+
+	\end{enumerate}
