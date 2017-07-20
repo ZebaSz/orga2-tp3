@@ -52,7 +52,8 @@ extern ENDGAME
 global _isr%1
 
 _isr%1:
-    ;xchg bx, bx
+    lea eax, [esp + 4 * 3]
+    push dword [eax] ; push eflags
     push %1
     jmp matar_tarea
 
@@ -340,9 +341,8 @@ matar_tarea:
     push esp ; push stack
     pushad ; push registers
 
-    mov eax, esp
-    sub eax, 11 * 4 ; aca deberia estar el eip
-    push eax ; push eip
+    lea eax, [esp + 4 * 15]
+    push dword [eax] ; push eip
 
     mov eax, cr0
     push eax
@@ -364,6 +364,7 @@ matar_tarea:
     test al, debug_on
     jz .tarea_muerta
 
+    ;xchg bx, bx
     push esp ; push array con toda la info de los registros
     call game_debug_info ; guarda contenido de los registros para mostrarlos luego
 
