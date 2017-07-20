@@ -213,6 +213,10 @@ unsigned int mmu_inicializar_dir_zombi(unsigned char jugador, unsigned char yPos
 	unsigned int pila0 = mmu_proxima_pagina_fisica_libre();
 	mmu_mapear_pagina(TASK_STACK_KERNEL, pd, pila0);
 
+	pd_entry* dir_paginas = (pd_entry*) pd;
+	pt_entry* tablas = (pt_entry*) ( (unsigned int) dir_paginas[32].page_addr << 12);
+	tablas[10].us = 0; // corregir permisos pila0
+
 	return pd;
 }
 
