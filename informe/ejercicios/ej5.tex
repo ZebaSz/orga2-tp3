@@ -1,1 +1,85 @@
-\section{Ejercicio 5: Interrupciones de reloj y teclado}
+\section{Ejercicio 5: Interrupciones de syscall, reloj y teclado}
+
+	\subsection{Rutina de atencion a reloj}
+	Dentro de la rutina del reloj se encuentra el codigo que proporcionan la concurrencia de tareas.
+
+	\begin{lstlisting}
+	sched_tarea_offset:     dd 0x00
+	sched_tarea_selector:   dw 0x00
+
+	_isr32:
+	    pushad
+	    test byte [ENDGAME], 1
+	    jnz .end
+
+    	call proximo_reloj
+
+	    call sched_tarea_actual
+	    cmp eax, 16 
+	    jge .next_task
+	    push eax
+	    call game_print_clock
+	    pop eax
+
+	    .next_task
+
+	    call sched_proximo_indice 
+	    ;xor eax, eax
+	    cmp ax, 0
+	    je .nojump
+	        mov [sched_tarea_selector], ax
+	        call fin_intr_pic1
+	        jmp far [sched_tarea_offset]
+	        jmp .end
+
+	    .nojump:
+	    call fin_intr_pic1
+
+	    .end:
+	    popad
+	    iret
+	\end{lstlisting}
+
+	Para lograr la concurrencia realizamos una llamada al scheduler, explicado en mayor detalle en el ejercicio 6, el cual nos devuelve cual sera la proxima tarea a ejecutar. En caso de que no halla que realizar un cambio de tarea volvemos con \textit{iret}. 
+
+	Ademas tambien el reloj deja de realizar la concurrencia entre tareas si el juego terminó. En este punto tambien actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla. 
+
+	Por ultimo, nos ocupamos de resetear el pic para poder recibir otra interrupcion de lejos. Esto lo realizamos sea en caso de cambiar de tarea o de permanecer en la misma.
+
+	\subsection{Rutina de atencion a teclado}
+	Las interrupciones del teclado nos dan la posibilidad de poder elegir y lanzar tareas, pero tambien nos permiten activar y desactivar el modo debug del cual daremos mas detalles en el ejercicio 7.
+
+	Tenemos en cuenta dos eventos a la hora de activar o desactivar la posibilidad de lanzar tareas o elegirlas, estas son: 
+	\begin{itemize}
+		\item{el final de juego la cual anula por completo la posibilidad de lanzar o cambiar el zombie.}
+
+		\item{y ademas cuando el cartel de debug se esta mostrando no se permite hacer ninguna accion, salvo desactivar el cartel para poder seguir jugando.}
+	\end{itemize}
+
+	No se tomo en cuenta los codigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupcion los codigos de las teclas \textit{A, S, W, X, lShift} para el \texttt{jugador A} y \textit{J, K, I, M, rShift} para el \texttt{jugador B}, caso contrario la interrupcion no realiza ninguna accion.
+
+	Al final de la interrupcion se debe resetear el pic para poder recibir nuevamente una interrupcion mediente el siguiente call a funcion :
+
+	\begin{lstlisting}
+		extern fin_intr_pic1
+		...
+   		.keyboard_end:
+    		call fin_intr_pic1
+    		...	
+	\end{lstlisting}
+
+
+	\subsection{Rutina de atencion a syscall}
+	Las tareas cuentan con una unica manera de comunicarse con el kernel, esto lo logran realizando una interrupcion a \texttt{0x66} indicando  en eax hacia donde quiere moverse la tarea.
+
+	Para lograr esto dentro de la rutina de atencion a la interrupcion realizamos las siguientes acciones:
+
+	\begin{itemize}
+		\item{Pintar el rastro del zombie, es decir el lugar donde esta actualmente con un (*).}
+		\item{Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombie es y a quien pertenece. Utilizar dicha informacion para dibujar la nueva ubicacion del zombie.}
+		\item{Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.}
+		\item{Caso contrario mapear y desmapear las paginas del zombie. Primero desmapear el area actual y luego mapear las nuevas paginas.}
+		\item{Saltar a idle.}
+	\end{itemize}
+
+	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la proxima tarea a ejecutar.
