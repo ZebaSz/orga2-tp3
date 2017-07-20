@@ -11,11 +11,11 @@
 		};
 	\end{lstlisting}
 
-	Los entradas de la \textit{IDT} fueron generadas mediante la utilización del macro provisto por la cátedra, el cual especificaba que la atención de la misma iba a darse en el archivos \textit{isr.asm} en el método llamado \textit{\_isrX} donde \textit{X} representa el numero de interrupción a responder. 
+	Las entradas de la \textit{IDT} fueron generadas mediante la utilización del macro provisto por la cátedra, el cual especificaba que la atención de la misma iba a darse en el archivos \textit{isr.asm} en el método llamado \textit{\_isrX} donde \textit{X} representa el numero de interrupción a responder. 
 
 	El único cambio significativo que realizamos en la generación de las entradas de la \textit{IDT} es modificar el atributo de la interrupción \texttt{0x66}, ya que esta iba a funcionar a modo de syscall para la tarea, por ende el código debía ser accesible desde nivel 3. 
 
-	Una vez llenados los campos procedimos a inicializar la \textit{IDT} de la siguiente manera :
+	Una vez llenados los campos procedimos a activar la \textit{IDT} de la siguiente manera :
 
 	\begin{lstlisting}
    		; Cargar IDT
