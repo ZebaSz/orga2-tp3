@@ -52,7 +52,7 @@ extern ENDGAME
 global _isr%1
 
 _isr%1:
-    xchg bx, bx
+    ;xchg bx, bx
     push %1
     jmp matar_tarea
 
