@@ -26,7 +26,7 @@ void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned c
 
     tss_zombi->ptl = 0x0000;
     tss_zombi->unused0 = 0x0000;
-    tss_zombi->esp0 = TASK_STACK_KERNEL + 0xFFF;
+    tss_zombi->esp0 = TASK_STACK_KERNEL + PAGE_SIZE;
     tss_zombi->ss0 = GDT_OFF_KERNEL_DATA;
     tss_zombi->unused1 = 0x0000;
     tss_zombi->esp1 = 0x00000000;
@@ -42,8 +42,8 @@ void tss_inicializar_zombi(unsigned char jugador, unsigned char yPos, unsigned c
     tss_zombi->ecx = 0x00000000;
     tss_zombi->edx = 0x00000000;
     tss_zombi->ebx = 0x00000000;
-    tss_zombi->esp = TASK_VIRT + 0xFFF;
-    tss_zombi->ebp = TASK_VIRT + 0xFFF;
+    tss_zombi->esp = TASK_VIRT + PAGE_SIZE;
+    tss_zombi->ebp = TASK_VIRT + PAGE_SIZE;
     tss_zombi->esi = 0x00000000;
     tss_zombi->edi = 0x00000000;
     tss_zombi->es = GDT_OFF_USER_DATA;
