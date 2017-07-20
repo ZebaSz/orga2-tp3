@@ -11,7 +11,6 @@
 #include "screen.h"
 #include "mmu.h"
 #include "sched.h"
-
 #include "i386.h"
 
 typedef enum direccion_e { IZQ = 0xAAA, DER = 0x441, ADE = 0x83D, ATR = 0x732 } direccion;
@@ -35,6 +34,15 @@ void game_print_score(unsigned int jugador);
 void game_inicializar();
 
 void game_finalizar();
+
+void game_debug_info(unsigned int* informacion);
+
+void game_debug_show();
+
+void game_debug_close();
+
+typedef struct str_debug_info {
+} __attribute__((__packed__)) debug_info;
 
 typedef struct str_jugador {
 	unsigned int yPos;

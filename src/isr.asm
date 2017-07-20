@@ -39,8 +39,9 @@ extern game_lanzar_zombi
 extern game_move_current_zombi
 extern game_print_clock
 extern game_matar_zombi_actual
-
 extern game_jugador_tecla
+extern game_debug_info
+extern game_debug_close
 extern ENDGAME
 
 ;;
@@ -51,7 +52,8 @@ extern ENDGAME
 global _isr%1
 
 _isr%1:
-    ;xchg bx, bx
+    xchg bx, bx
+    push %1
     jmp matar_tarea
 
 %endmacro
@@ -85,10 +87,10 @@ isrmensaje_4_len:    equ $ - isrmensaje_4
 isrmensaje_5:        db 'BOUND Range Exceeded (5)'
 isrmensaje_5_len:    equ $ - isrmensaje_5
 
-isrmensaje_6:        db 'Invalid Opcode (Undefined Opcode) (6)'
+isrmensaje_6:        db 'Invalid Opcode (6)'
 isrmensaje_6_len:    equ $ - isrmensaje_6
 
-isrmensaje_7:        db 'Device Not Available (No Math Coprocessor) (7)'
+isrmensaje_7:        db 'Device Not Available (7)'
 isrmensaje_7_len:    equ $ - isrmensaje_7
 
 isrmensaje_8:        db 'Double Fault (8)'
@@ -115,7 +117,7 @@ isrmensaje_14_len:   equ $ - isrmensaje_14
 isrmensaje_15:       db 'reserved (15)'
 isrmensaje_15_len:   equ $ - isrmensaje_15
 
-isrmensaje_16:       db 'x87 FPU Foating-Point Error (Math Fault) (16)'
+isrmensaje_16:       db 'x87 FPU Foating-Point Error (16)'
 isrmensaje_16_len:   equ $ - isrmensaje_16
 
 isrmensaje_17:       db 'Alignment Check (17)'
@@ -218,6 +220,9 @@ _isr33:
     cmp al, key_debug
     je .toggle_debug
 
+    test byte [debug_flag], debug_shown
+    jnz .keyboard_end
+
     cmp al, key_a_up
     je .move_jugador
     cmp al, key_a_dn
@@ -243,7 +248,7 @@ _isr33:
     jmp .keyboard_end
 
     .toggle_debug:
-        xchg bx, bx
+        ;xchg bx, bx
 
         mov al, [debug_flag]
         test al, (debug_shown | debug_on)
@@ -254,11 +259,12 @@ _isr33:
         ; copiar buffer de video viejo
         mov byte [debug_flag], debug_off
         call sched_toggle_debug
+        call game_debug_close
         jmp .keyboard_end
 
         .enable_debug:
         mov byte [debug_flag], debug_on
-        call sched_toggle_debug
+        ;call sched_toggle_debug
         jmp .keyboard_end
 
     .move_jugador:
@@ -324,28 +330,42 @@ proximo_reloj:
                 popad
         ret
         
+
+get_eip: 
+    mov eax, [esp]
+    ret
         
 matar_tarea:
     ; mostrar cartel debug
+    push esp ; push stack
+    pushad ; push registers
+
+    mov eax, esp
+    sub eax, 11 * 4 ; aca deberia estar el eip
+    push eax ; push eip
+
+    mov eax, cr0
+    push eax
+    mov eax, cr2
+    push eax
+    mov eax, cr3
+    push eax
+    mov eax, cr4
+    push eax
+
+    push cs ; push segmentos 
+    push ds
+    push es
+    push fs
+    push gs
+    push ss
+
     mov al, [debug_flag]
     test al, debug_on
     jz .tarea_muerta
-    ;     ; copiamos mapa viejo a buffer
-    ;     mov esi, 80 * 2 ; ancho de una fila de video
-    ;     mov edx, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
-    ;     xor ebx, ebx
-    ;     .copiar_fila
-    ;         xor ecx, ecx
-    ;         mov eax, edx
-    ;         .copiar_punto
-    ;             mov edi, [eax + 2 * ecx]
-    ;             mov [eax + 2 * ecx], 
 
-    ;     ; dibujamos dialogo debug
-    ;     mov eax, VIDEO + (2 * (80 * 7 + 25)) ; apuntamos a la esquina de la memoria de video
-    ;     xor ebx, ebx
-    ;     .dibujar_fila
-    ;         xor ecx, ecx
+    push esp ; push array con toda la info de los registros
+    call game_debug_info ; guarda contenido de los registros para mostrarlos luego
 
     mov byte [debug_flag], debug_shown
 

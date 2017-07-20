@@ -8,6 +8,8 @@
 #include "defines.h"
 #include "idt.h"
 #include "isr.h"
+#include "colors.h"
+#include "sched.h"
 
 #include "tss.h"
 
@@ -70,3 +72,5 @@ void idt_inicializar() {
     // int 0x66 debe ser accesible desde ring 3
     idt[102].attr = (unsigned short) 0xEE00;
 }
+
+

@@ -27,6 +27,8 @@ unsigned int sched_lanzar_tarea(unsigned int jugador);
 
 void sched_matar_tarea_actual();
 
+unsigned char sched_modo_debug();
+
 extern unsigned int tareaActual;
 
 
