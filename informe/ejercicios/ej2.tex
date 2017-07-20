@@ -1,1 +1,57 @@
 \section{Ejercicio 2: IDT y rutinas de atención a excepciones}
+
+	\subsection{Inicialización}
+
+	Para poder tener acceso a la \textit{IDT} se requiere de un descriptor que indique el lugar donde se encuentra el arreglo con las entradas de atencion a interrupciones. 
+
+	\begin{lstlisting}
+		idt_descriptor IDT_DESC = {
+	    	sizeof(idt) - 1,
+	    	(unsigned int) &idt
+		};
+	\end{lstlisting}
+
+	Los entradas de la \textit{IDT} fueron generadas mediante la utilizacion del macro provisto por la catedra, el cual especificaba que la atencion de la misma iba a darse en el archivos \textit{isr.asm} en el metodo llamado \textit{\_isrX} donde \textit{X} representa el numero de interrupcion a responder. 
+
+	El unico cambio significativo que realizamos en la generación de las entradas de la \textit{IDT} es modificar el atributo de la interrupción \texttt{0x66}, ya que esta iba a funcionar a modo de syscall para la tarea, por ende el codigo debia ser accesible desde nivel 3. 
+
+	Una vez llenados los campos procedimos a inicializar la \textit{IDT} de la siguiente manera :
+
+	\begin{lstlisting}
+   		; Cargar IDT
+    		lidt [IDT_DESC] ; IDT_DESC es el descriptor arriba mencionado
+	\end{lstlisting}
+
+	\subsection{Excepciones}
+
+	Podemos dividir a las interrupciones y hablar del subgrupo excepciones que son errores generados por el \textit{CPU}. En muchos casos las excepciones no son realmente errores.
+
+	Para atender las excepciones usamos el macro provisto por la catedra:
+
+	\begin{lstlisting}
+   		%macro ISR 1
+		global _isr%1
+
+		_isr%1:
+		    ;xchg bx, bx
+		    push %1
+		    jmp matar_tarea
+
+		%endmacro
+
+		ISR 0; inicializamos los macros que eran necesarios para atender las excepciones
+		...
+	\end{lstlisting}
+
+	En cuando al codigo de manejo de la excepción agregamos la logica de matar a la tarea y saltar a idle. A lo que nos referimos cuando hablamos de matar a la tarea:
+
+	\begin{itemize}
+		\item{Guardar datos relevantes sobre el estadode los registros para en caso de ser necesario mostrarlos en pantalla (modo debug).}
+		\item{Imprimir en pantalla la muerte del zombi.}
+		\item{Chequear si las condiciones para que el juego finalize se cumplen. Es decir ver si aun quedan zombis por tirar.}
+		\item{En caso de estar en modo debug mostrar la informacion anteriormente guardada.}
+		\item{Indicarle al scheduler que la tarea no esta activa.}
+		\item{Saltar a idle.}
+	\end{itemize} 
+
+	De esta manera al proximo ciclo de clock el scheduler se encargara nuevamente de buscar la tarea correspondiente.
