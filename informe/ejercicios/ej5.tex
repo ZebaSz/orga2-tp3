@@ -1,69 +1,70 @@
 \section{Ejercicio 5: Interrupciones de reloj y teclado}
 
 	\subsection{Rutina de atención a reloj}
-	Dentro de la rutina del reloj se encuentra el código que proporcionan la concurrencia de tareas.
+
+	Dentro de la rutina del reloj se encuentra el código encargado de la conmutación de tareas:
 
 	\begin{lstlisting}
-	sched_tarea_offset:     dd 0x00
-	sched_tarea_selector:   dw 0x00
+sched_tarea_offset:     dd 0x00
+sched_tarea_selector:   dw 0x00
 
-	_isr32:
-	    pushad
-	    test byte [ENDGAME], 1
-	    jnz .end
+_isr32:
+    pushad
+    test byte [ENDGAME], 1
+    jnz .end
 
-    	call proximo_reloj
+    call proximo_reloj
 
-	    call sched_tarea_actual
-	    cmp eax, 16 
-	    jge .next_task
-	    push eax
-	    call game_print_clock
-	    pop eax
+    call sched_tarea_actual
+    cmp eax, 16 
+    jge .next_task
+    push eax
+    call game_print_clock
+    pop eax
 
-	    .next_task
+    .next_task
 
-	    call sched_proximo_indice 
-	    ;xor eax, eax
-	    cmp ax, 0
-	    je .nojump
-	        mov [sched_tarea_selector], ax
-	        call fin_intr_pic1
-	        jmp far [sched_tarea_offset]
-	        jmp .end
+    call sched_proximo_indice
+    cmp ax, 0
+    je .nojump
+        mov [sched_tarea_selector], ax
+        call fin_intr_pic1
+        jmp far [sched_tarea_offset]
+        jmp .end
 
-	    .nojump:
-	    call fin_intr_pic1
+    .nojump:
+    call fin_intr_pic1
 
-	    .end:
-	    popad
-	    iret
+    .end:
+    popad
+    iret
 	\end{lstlisting}
 
-	Para lograr la concurrencia realizamos una llamada al scheduler, explicado en mayor detalle en el ejercicio 6, el cual nos devuelve cual sera la próxima tarea a ejecutar. En caso de que no halla que realizar un cambio de tarea volvemos con \textit{IRET}. 
+	Para lograr saber a que tarea saltar debe llamarse al scheduler, explicado en mayor detalle en el ejercicio 7, el cual nos devuelve el selector de la próxima tarea a ejecutar. En caso de que no haya que realizar un cambio de tarea (no hay tareas o se trata de la tarea actual) volvemos con \textit{IRET}.
 
-	Ademas también el reloj deja de realizar la concurrencia entre tareas si el juego terminó. En este punto también actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla. 
+	En este punto también actualizamos el reloj de la tarea que se ejecuta actualmente en la pantalla, además del reloj global del sistema. Si el juego terminó, el sistema deja de conmutar tareas.
 
-	Por ultimo, nos ocupamos de resetear el pic para poder recibir otra interrupción de lejos. Esto lo realizamos sea en caso de cambiar de tarea o de permanecer en la misma.
+	Por último, nos ocupamos de resetear el PIC para poder recibir las siguientes interrupción. Esto lo realizamos siempre, más allá de si realiza un cambio de tarea o no.
 
 	\subsection{Rutina de atención a teclado}
+
 	Las interrupciones del teclado nos dan la posibilidad de poder elegir y lanzar tareas, pero también nos permiten activar y desactivar el modo debug del cual daremos mas detalles en el ejercicio 7.
 
 	Tenemos en cuenta dos eventos a la hora de activar o desactivar la posibilidad de lanzar tareas o elegirlas, estas son: 
 	\begin{itemize}
-		\item{el final de juego la cual anula por completo la posibilidad de lanzar o cambiar el zombi.}
+		\item el final de juego la cual anula por completo la posibilidad de lanzar o cambiar el zombi.
 
-		\item{y ademas cuando el cartel de debug se esta mostrando no se permite hacer ninguna acción, salvo desactivar el cartel para poder seguir jugando.}
+		\item y ademas cuando el cartel de debug se esta mostrando no se permite hacer ninguna acción, salvo desactivar el cartel para poder seguir jugando.
 	\end{itemize}
 
-	No se tomo en cuenta los códigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupción los códigos de las teclas \textit{A, S, W, X, lShift} para el \texttt{jugador A} y \textit{J, K, I, M, rShift} para el \texttt{jugador B}, ademas contamos con la tecla \textit{Y} para activar el modo debug caso contrario la interrupcion no realiza ninguna acción.
+	No se tomo en cuenta los códigos de tecla para cuando uno suelta una tecla, ya que solo consideramos como casos a resolver por la interrupción los códigos de las teclas \textit{A, S, W, X, L\_Shift} para el \texttt{jugador A} y \textit{J, K, I, M, R\_Shift} para el \texttt{jugador B}, ademas contamos con la tecla \textit{Y} para activar el modo debug caso contrario la interrupcion no realiza ninguna acción.
 
 	Al final de la interrupción se debe resetear el pic para poder recibir nuevamente una interrupción mediante el siguiente call a función :
 
 	\begin{lstlisting}
-		extern fin_intr_pic1
-		...
-   		.keyboard_end:
-    		call fin_intr_pic1
-    		...	
+extern fin_intr_pic1
+	...
+	.keyboard_end:
+	call fin_intr_pic1
+	...	
 	\end{lstlisting}

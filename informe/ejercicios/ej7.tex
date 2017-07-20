@@ -7,11 +7,15 @@
 	Para lograr esto dentro de la rutina de atención a la interrupción realizamos las siguientes acciones:
 
 	\begin{itemize}
-		\item{Pintar el rastro del zombi, es decir el lugar donde esta actualmente con un (*).}
-		\item{Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombi es y a quien pertenece. Ademas sabemos hacia donde se va a mover chequeando el registro \textit{eax}. Utilizar dicha información para dibujar la nueva ubicacion del zombie.}
-		\item{Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.}
-		\item{Caso contrario mapear y desmapear las paginas del zombi. Primero desmapear el area actual y luego mapear las nuevas paginas.}
-		\item{Saltar a idle.}
+		\item Pintar el rastro del zombi, es decir el lugar donde esta actualmente con un (*).
+
+		\item Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombi es y a quien pertenece. Ademas sabemos hacia donde se va a mover chequeando el registro \textit{eax}. Utilizar dicha información para dibujar la nueva ubicacion del zombie.
+
+		\item Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.
+
+		\item Caso contrario mapear y desmapear las paginas del zombi. Primero desmapear el area actual y luego mapear las nuevas paginas.
+
+		\item Saltar a idle.
 	\end{itemize}
 
 	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la próxima tarea a ejecutar.
