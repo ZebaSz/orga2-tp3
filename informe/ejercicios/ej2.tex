@@ -39,18 +39,58 @@ ISR 0; inicializamos los macros que eran necesarios para atender las excepciones
 
 	En cuando al código de manejo de la excepción agregamos la lógica de matar a la tarea y saltar a idle. A lo que nos referimos cuando hablamos de matar a la tarea:
 
-	\begin{itemize}
-		\item Guardar datos relevantes sobre el estado de los registros para en caso de ser necesario mostrarlos en pantalla (modo debug).
-
+	\begin{enumerate}
 		\item Imprimir en pantalla la muerte del zombi.
+	\begin{lstlisting}
+call game_matar_zombi_actual	
+	\end{lstlisting}
 
 		\item Chequear si las condiciones para que el juego finalice se cumplen. Es decir ver si aun quedan zombis por tirar.
+	\begin{lstlisting}
+if(jugadores[JUG_A].remaining == 0 && jugadores[JUG_B].remaining == 0 &&
+		jugadores[JUG_A].current == 0 && jugadores[JUG_B].current == 0) {
+	game_finalizar();
+}
+	\end{lstlisting}
 
-		\item En caso de estar en modo debug mostrar la información anteriormente guardada.
+		\item En caso de estar en modo debug guardo y muestros la información anteriormente guardada.
+	\begin{lstlisting}
+mov al, [debug_flag]
+test al, debug_on
+jz .tarea_muerta
 
-		\item Indicarle al scheduler que la tarea no esta activa.
+pushad
 
-		\item Saltar a idle.
-	\end{itemize} 
+sub esp, 4 ; espacio para eip
+
+mov eax, cr0
+push eax
+mov eax, cr2
+push eax
+mov eax, cr3
+push eax
+mov eax, cr4
+push eax
+
+push cs ; push segmentos 
+push ds
+push es
+push fs
+push gs
+push ss
+
+push esp
+	\end{lstlisting}
+
+		\item Indicarle al scheduler que no conmute mas tareas.
+	\begin{lstlisting}
+call sched_toggle_debug ; dejar de conmutar tareas
+	\end{lstlisting}
+
+		\item Sacar la tarea de la lista del scheduler y por ultimo saltar a idle.
+	\begin{lstlisting}
+call sched_matar_tarea_actual
+	\end{lstlisting}
+	\end{enumerate} 
 
 	De esta manera al próximo ciclo de clock el scheduler se encargara nuevamente de buscar la tarea correspondiente.
