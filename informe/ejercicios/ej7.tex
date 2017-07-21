@@ -11,17 +11,44 @@
 
 	Para lograr esto dentro de la rutina de atención a la interrupción realizamos las siguientes acciones:
 
-	\begin{itemize}
-		\item Pintar el rastro del zombi, es decir el lugar donde esta actualmente con un (*).
+	\begin{enumerate}
+		\item Pintar el rastro del zombi, es decir el lugar donde esta actualmente con un \textit{(*)}.
+\begin{lstlisting}
+game_print_rastro(zombis[tarea].xPos, zombis[tarea].yPos);
+\end{lstlisting}
 
-		\item Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombi es y a quien pertenece. Ademas sabemos hacia donde se va a mover chequeando el registro \textit{eax}. Utilizar dicha información para dibujar la nueva ubicacion del zombie.
+
 
 		\item Chequear si las condiciones para anotar un punto estan dadas. Si esto es asi se procede a matar a la tarea siguiendo los pasos ya indicados en el ejercicio 2.
+\begin{lstlisting}
+if(newXPos == 0 || newXPos == 79) {
+    unsigned int puntoPara = newXPos == 0 ? JUG_B : JUG_A;
+    if(++jugadores[puntoPara].score == 10) {
+        game_finalizar();
+    }
+    game_print_score(puntoPara);
+    game_matar_zombi_actual();
+    sched_matar_tarea_actual();
+}
+\end{lstlisting}
 
 		\item Caso contrario mapear y desmapear las paginas del zombi. Primero desmapear el area actual y luego mapear las nuevas paginas.
+\begin{lstlisting}
+// mapear correctamente
+mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos-1, newXPos-1, newYPos-1);
+\end{lstlisting}
+
+        \item Sabiendo que tarea se esta ejecutando actualmente podemos saber que zombi es y a quien pertenece. Ademas sabemos hacia donde se va a mover chequeando el registro \textit{eax}. Utilizar dicha información para dibujar la nueva ubicacion del zombie.
+\begin{lstlisting}
+game_print_zombi_mapa(tarea);
+\end{lstlisting}
 
 		\item Saltar a idle.
-	\end{itemize}
+\begin{lstlisting}
+mov [sched_tarea_selector], word 0x68
+jmp far [sched_tarea_offset]
+\end{lstlisting}        
+	\end{enumerate}
 
 	Luego de que termine el ciclo de clock en idle el scheduler se encargara de devolver la próxima tarea a ejecutar.
 
