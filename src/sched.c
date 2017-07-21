@@ -35,7 +35,7 @@ unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
 }
 
 unsigned short sched_proximo_indice() {
-	unsigned int proxTarea = tareaActual;
+	unsigned int proxTarea = TASK_COUNT;
 	unsigned int proximoJugador = 1 - ultimoJugador;
 
 	if(modo_debug == FALSE) {

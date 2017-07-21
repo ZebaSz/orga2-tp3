@@ -6,11 +6,72 @@
 
     Adicionalmente, el scheduler se inicializa con tareas inválida, ya que el mismo mantiene el número de la última tarea ejecutada para cada jugador. Los valores inválidos omiten ciertos procesos como el dibujado del reloj de la tarea actual (la tarea Idle maneja su propio reloj).
 
+    \subsection{Conmutación de tareas}
+
+    El scheduler guarda varios datos sobre el estado de las tareas: por un lado, tiene un arreglo con el estado de las 16 tareas (en ejecución o detenidas); por el otro, mantiene en particular las últimas tareas de cada jugador, para poder asignarles tiempo en ronda.
+
+    También guarda la última tarea ejecutada para mantener este registro correctamente y es usada por otros servicios del sistema. Este valor puede no coincidir con la tarea indicada en el \texttt{tr}, ya que la tarea es desalojada al moverse, pero debemos respetar el orden de ejecución de todos modos.
+
+    Para identificar la siguiente tarea a ejecutar, el scheduler busca una tarea activa sobre el arreglo de tareas la siguiente tarea activa:
+    
+    \lstset{escapechar=@,style=c}
+    \begin{lstlisting}
+unsigned int sched_buscar_tarea(unsigned int jugador, unsigned int status) {
+    unsigned int tarea = tareasAnteriores[jugador] + 1;
+    if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
+        tarea = TASK_PER_PLAYER * jugador;
+    }
+    int i;
+    for (i = 0; i < TASK_PER_PLAYER && status_tareas[tarea] != status; ++i) {
+        ++tarea;
+        if(tarea >= (TASK_PER_PLAYER * (1 + jugador))) {
+            tarea = TASK_PER_PLAYER * jugador;
+        }
+    }
+    return tarea;
+}
+    \end{lstlisting}
+
+    Si la tarea retornada por este método es igual a la anterior, significa que el jugador posee como máximo 1 tarea activa.
+
+    Si la tarea retornada está inactiva, el jugador no tiene tareas activas, por lo que se busca una tarea del jugador actual. Si el mismo tampoco tiene tareas, o tiene una única tarea (y la misma coincide con el \texttt{tr}, es decir, no fue desalojada), no hace falta conmutar
+
+    Esta lógica también es utilizada para buscar una tarea libre en caso que deba lanzarse un zombi nuevo, por lo que no se asigna el primer zombi libre, sino que se asignan en secuencia. Esto podría modificarse tomando la tarea anterior por parámetro en lugar de buscarla en el arreglo dentro de este método.
+
+    El scheduler también provee la siguiente funcionalidad:
+
+    \begin{enumerate}
+
+        \item Una función para lanzar una tarea, que retorna su número asignado y la marca como iniciada
+
+        \begin{lstlisting}
+unsigned int sched_lanzar_tarea(unsigned int jugador) {
+    unsigned int nuevaTarea = sched_buscar_tarea(jugador, FALSE);
+    status_tareas[nuevaTarea] = TRUE;
+    return nuevaTarea;
+}
+        \end{lstlisting}
+
+        \item Una función para terminar la tarea en ejecución, que marca la misma como finalizada y salta a la tarea Idle (utilizando un jump far)
+
+        \begin{lstlisting}
+void sched_matar_tarea_actual() {
+    status_tareas[tareaActual] = FALSE;
+    __asm __volatile("ljmp $0x68, $0" : : );
+}
+        \end{lstlisting}
+
+        \item Un toggle para el modo debug, ya que no se debe conmutar tareas durante el mismo
+
+
+    \end{enumerate}
+
 	\subsection{Servicio mover}
 	Las tareas cuentan con una única manera de comunicarse con el kernel, esto lo logran realizando una interrupción a \texttt{0x66} indicando en \textit{eax} hacia donde quiere moverse la tarea.
 
 	Para lograr esto dentro de la rutina de atención a la interrupción realizamos las siguientes acciones:
 
+    \lstset{escapechar=@,style=c}
 	\begin{enumerate}
 		\item Pintar el rastro del zombi, es decir el lugar donde esta actualmente con un \textit{(*)}.
 \begin{lstlisting}
@@ -34,7 +95,6 @@ if(newXPos == 0 || newXPos == 79) {
 
 		\item Caso contrario mapear y desmapear las paginas del zombi. Primero desmapear el area actual y luego mapear las nuevas paginas.
 \begin{lstlisting}
-// mapear correctamente
 mmu_mover_zombi(owner, zombis[tarea].xPos-1, zombis[tarea].yPos-1, newXPos-1, newYPos-1);
 \end{lstlisting}
 
